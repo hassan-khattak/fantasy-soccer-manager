@@ -1,0 +1,421 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Transfer offers</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+
+    <link rel="stylesheet" href="../../styles/global.css">
+    <link rel="stylesheet" href="transfer-offers.css" />
+</head>
+
+<body>
+    <div class="page-layout-container">
+        <header>
+            <div class="mui-appbar mui--appbar-line-height">
+                <div class="mui-container-fluid">
+
+                    <div class="app-bar-leading mui-col-md-4">
+                        <div class="app-name">
+                            ⚽ Soccer Manager
+                        </div>
+                    </div>
+                    <div class="app-bar-center mui-col-md-4">
+
+                        <div class="team-name text-center">
+                            🇷🇴 Team name
+                        </div>
+
+                        <div class="team-budget">
+                            $12,345,678
+                            <button class="mui-btn mui-btn--fab eye-btn">
+                                <img src="../../assets/eye.png" />
+                            </button>
+                        </div>
+                    </div>
+                    <div class="app-bar-trailing mui-col-md-4">
+                        <a href="../team/team.html">Team</a>
+                        <a href="#">Edit team</a>
+                        <a href="#">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="layout">
+                <div class="header">
+                    <div class="mui-container">
+                        <br>
+                        <div class="title">Transfer offers</div>
+                        <div class="mui-row">
+                            <div class="search-and-filter">
+                                <div class="mui-panel search-bar">
+                                    <img class="search-icon" src="../../assets/search.png" />
+                                    <input type="text" placeholder="Search transfer offers" />
+                                    <img class="clear-button" src="../../assets/clear.png" />
+                                </div>
+                                <img class="filter-button" src="../../assets/filter.png" alt="Filter">
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-col-md-6 search-by-section">
+                                <span>Search by</span>
+
+                                <span class="mui-radio">
+                                    <label>
+                                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1"
+                                            checked />
+                                        Player name
+                                    </label>
+                                </span>
+                                <span class="mui-radio">
+                                    <label>
+                                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2" />
+                                        Team name
+                                    </label>
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-col-md-6">
+                                <h4>Minimum price</h4>
+                                <div class="mui-panel input-card">
+                                    <input type="number" placeholder="Minimum price" />
+                                </div>
+                            </div>
+
+                            <div class="mui-col-md-6">
+                                <h4>Maximum price</h4>
+                                <div class="mui-panel input-card">
+                                    <input type="number" placeholder="Maximum price" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-col-md-6">
+                                <h4>Team country</h4>
+                                <div class="mui-panel input-card">
+                                    <input type="text" placeholder="Any" />
+                                    <span class="mui-caret"></span>
+                                </div>
+                            </div>
+
+                            <div class="mui-col-md-6">
+                                <h4>Player country</h4>
+                                <div class="mui-panel input-card">
+                                    <input type="text" placeholder="Any" />
+                                    <span class="mui-caret"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="content">
+                    <div class="mui-container">
+                        <!-- items -->
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mui-row">
+                            <div class="mui-panel">
+                                <div class="transfer-offer-card">
+                                    <div class="transfer-offer-card-avatar">
+                                        <img class="transfer-offer-card-avatar-image" src="../../assets/user.png" />
+                                        <div class="player-position-code">GK</div>
+                                    </div>
+                                    <div class="transfer-offer-card-details">
+                                        <span class="player-name">Player name</span>,
+                                        <span class="player-age" title="Birthdate: yyyy-MM-dd">Age</span>,
+                                        <span class="player-nationality">
+                                            🇷🇴 Romania
+                                        </span>
+                                        <div>
+                                            Team:
+                                            <span class="offer-team-name">Team name</span>,
+                                            <span class="team-country">🇷🇴 Romania</span>
+                                        </div>
+                                        <div class="player-position">
+                                            Goalkeeper
+                                        </div>
+                                        <div>
+                                            Created at: yyyy-MM-dd HH:mm:ss
+                                        </div>
+                                    </div>
+                                    <div class="transfer-offer-card-trailing">
+                                        <div class="player-market-value">$1,234,567</div>
+                                        <a class="mui-btn mui-btn--flat mui-btn--small buy-button" href="#">Buy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="footer">
+                    <!-- pagination -->
+
+                    <div class="pagination">
+                        <button class="mui-btn mui-btn--flat mui-btn--small">Previous</button>
+                        <button class="mui-btn mui-btn--primary mui-btn--small">1</button>
+                        <button class="mui-btn mui-btn--flat mui-btn--small">2</button>
+                        <button class="mui-btn mui-btn--flat mui-btn--small">3</button>
+                        <button class="mui-btn mui-btn--flat mui-btn--small" disabled>...</button>
+                        <button class="mui-btn mui-btn--flat mui-btn--small">8</button>
+                        <button class="mui-btn mui-btn--flat mui-btn--small">9</button>
+                        <button class="mui-btn mui-btn--flat mui-btn--small">10</button>
+                        <button class="mui-btn mui-btn--flat mui-btn--small">Next</button>
+                    </div>
+                </div>
+
+        </main>
+
+        <footer>
+            <div class="text-center">
+                Toptal Soccer Manager
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,162 @@
+.mui-panel {
+    padding: 0px;
+    border-radius: 10px;
+}
+
+.filter-button {
+    width: 32px;
+    height: 32px;
+    padding: 8px;
+}
+
+.search-and-filter {
+    display: flex;
+    align-items: center;
+}
+
+.search-and-filter .search-bar {
+    flex: 1;
+    align-self: center;
+    margin: 0;
+}
+
+.search-and-filter .filter-button {
+    align-self: center;
+}
+
+.input-card{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.input-card input {
+    border: none;
+    font-size: 16px;
+    flex-grow: 1;
+}
+
+.input-card .mui-caret {
+    margin: 0.5rem;
+}
+
+.search-by-section {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.search-by-section .mui-radio {
+    display: inline-block;
+}
+
+.transfer-offer-card {
+    display: flex;
+    align-items: center;
+}
+
+.transfer-offer-card-avatar {
+    margin-right: 16px;
+    background-color: #e0e0e0;
+    border-radius: 10px 0 0 10px;
+    height: 96px;
+    position: relative;
+}
+
+.transfer-offer-card-avatar-image {
+    width: 96px;
+    height: 96px;
+    border-radius: 10px 0 0 10px;
+}
+
+.transfer-offer-card-details {
+    display: block;
+    flex: 1;
+}
+
+
+.player-position-code {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background-color: #730202ce;
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.player-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.player-age {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.player-nationality {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.player-position {
+    color: #730202;
+}
+
+.transfer-offer-card-trailing {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-right: 32px;
+}
+
+.player-market-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #025d03;
+    padding: 8px;
+}
+
+.mui-btn.mui-btn--flat.buy-button {
+    color: #019503
+}
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    flex-wrap: nowrap;
+}
+
+.layout .header {
+    flex-shrink: 0;
+    width: 100%;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.layout .content {
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 2em;
+    width: 100%;
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.layout .footer {
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding-top: 8px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+

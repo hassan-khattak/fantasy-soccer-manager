@@ -1,0 +1,83 @@
+
+
+.mui-panel {
+    padding: 0px;
+    border-radius: 10px;
+}
+
+.player-card {
+    display: flex;
+    align-items: center;
+}
+
+.player-card-avatar {
+    margin-right: 16px;
+    background-color: #e0e0e0;
+    border-radius: 10px 0 0 10px;
+    height: 96px;
+    position: relative;
+}
+
+.player-card-avatar-image {
+    width: 96px;
+    height: 96px;
+    border-radius: 10px 0 0 10px;
+}
+
+.player-card-details {
+    display: block;
+    flex: 1;
+}
+
+
+.player-position-code {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background-color: #730202ce;
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.player-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.player-age {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.player-position {
+    color: #730202;
+}
+
+.player-card-trailing {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-right: 32px;
+}
+
+.player-market-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #025d03;
+    padding: 8px;
+}
+
+
+
+.team-market-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #025d03;
+}
+
+.mui-btn.mui-btn--flat.sell-button {
+    color: rgb(121, 3, 3)
+}
