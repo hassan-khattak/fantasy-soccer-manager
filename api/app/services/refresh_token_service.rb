@@ -13,11 +13,13 @@ class RefreshTokenService
     raw
   end
 
+  # Returns [new_raw_token, user]
   def self.rotate(raw_token)
     record = find_active!(raw_token)
     user   = record.user
     record.update!(revoked_at: Time.current)
-    issue(user)
+    new_raw = issue(user)
+    [ new_raw, user ]
   end
 
   def self.revoke(raw_token)

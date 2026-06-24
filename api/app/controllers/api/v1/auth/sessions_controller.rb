@@ -19,16 +19,8 @@ module Api
 
         # POST /api/v1/auth/refresh
         def refresh
-          raw_token = params[:refresh_token]
-          new_raw   = RefreshTokenService.rotate(raw_token)
-          # Re-fetch user from the new refresh token record to generate a fresh JWT
-          user      = RefreshToken.find_by(token_digest: RefreshTokenService.send(:digest, new_raw))&.user
-
-          if user
-            render json: token_response(user.generate_jwt, new_raw), status: :ok
-          else
-            render json: { error: 'Invalid refresh token' }, status: :unauthorized
-          end
+          new_raw, user = RefreshTokenService.rotate(params[:refresh_token])
+          render json: token_response(user.generate_jwt, new_raw), status: :ok
         rescue RefreshTokenService::InvalidToken => e
           render json: { error: e.message }, status: :unauthorized
         end

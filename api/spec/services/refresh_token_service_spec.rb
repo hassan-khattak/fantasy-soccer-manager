@@ -27,12 +27,13 @@ RSpec.describe RefreshTokenService do
   end
 
   describe '.rotate' do
-    it 'revokes the old token and returns a new raw token' do
+    it 'returns a new raw token and the user' do
       old_raw = RefreshTokenService.issue(user)
-      new_raw = RefreshTokenService.rotate(old_raw)
+      new_raw, returned_user = RefreshTokenService.rotate(old_raw)
 
       expect(new_raw).not_to eq(old_raw)
       expect(new_raw).to match(/\A[0-9a-f]{64}\z/)
+      expect(returned_user).to eq(user)
     end
 
     it 'marks the old token as revoked' do

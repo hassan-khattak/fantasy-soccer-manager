@@ -1,9 +1,12 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+# Development seed — 2 users available immediately for Slice 2 work
+# Idempotent: safe to run multiple times
+
+[
+  { email: 'dev1@example.com', password: 'password123' },
+  { email: 'dev2@example.com', password: 'password123' }
+].each do |attrs|
+  User.find_or_create_by!(email: attrs[:email]) do |u|
+    u.password = attrs[:password]
+  end
+  puts "Seeded user: #{attrs[:email]}"
+end
