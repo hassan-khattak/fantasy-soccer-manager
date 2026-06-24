@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files (both roots)
+.env
+.env.*
+!.env.example
+api/.env
+api/.env.*
+!api/.env.example
+
+# Rails — api/
+api/.bundle/
+api/log/*
+api/tmp/*
+!api/log/.keep
+!api/tmp/.keep
+!api/tmp/pids/
+!api/tmp/pids/.keep
+api/storage/*
+!api/storage/.keep
+api/config/master.key
+api/config/credentials/*.key
+api/.kamal/secrets
+
+# Mobile — Expo / React Native
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/.env
+mobile/.env.*
+!mobile/.env.example
