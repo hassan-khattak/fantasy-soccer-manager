@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Required for Devise to mix authenticate_user! into controllers (skip generates no extra routes)
+  devise_for :users, skip: :all
+
   namespace :api do
     namespace :v1 do
       namespace :auth do

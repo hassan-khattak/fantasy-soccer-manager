@@ -4,6 +4,7 @@ RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
       build-essential \
       libpq-dev \
+      libyaml-dev \
       curl \
     && rm -rf /var/lib/apt/lists/*
 

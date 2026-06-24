@@ -32,7 +32,7 @@ RSpec.describe 'POST /api/v1/auth/register', type: :request do
     it 'returns 422 with an errors key' do
       post '/api/v1/auth/register', params: valid_params, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json).to have_key('errors')
     end
   end
@@ -41,7 +41,7 @@ RSpec.describe 'POST /api/v1/auth/register', type: :request do
     it 'returns 422' do
       post '/api/v1/auth/register', params: { user: { email: 'x@example.com' } }, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 end

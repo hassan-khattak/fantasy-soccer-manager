@@ -55,9 +55,10 @@ RSpec.describe 'Auth Sessions', type: :request do
 
     context 'with an expired refresh token' do
       it 'returns 401' do
+        token = raw_refresh_token  # force let evaluation before expiring it
         RefreshToken.last.update!(expires_at: 1.day.ago)
 
-        post '/api/v1/auth/refresh', params: { refresh_token: raw_refresh_token }, as: :json
+        post '/api/v1/auth/refresh', params: { refresh_token: token }, as: :json
         expect(response).to have_http_status(:unauthorized)
       end
     end

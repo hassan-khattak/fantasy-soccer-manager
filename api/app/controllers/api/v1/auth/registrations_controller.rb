@@ -12,7 +12,7 @@ module Api
             refresh_token  = RefreshTokenService.issue(user)
             render json: token_response(access_token, refresh_token), status: :created
           else
-            render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+            render json: { errors: user.errors.full_messages }, status: :unprocessable_content
           end
         end
 
