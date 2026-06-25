@@ -8,6 +8,7 @@ module Api
           user = User.new(registration_params)
 
           if user.save
+            TeamGeneratorService.call(user)
             access_token   = user.generate_jwt
             refresh_token  = RefreshTokenService.issue(user)
             render json: token_response(access_token, refresh_token), status: :created

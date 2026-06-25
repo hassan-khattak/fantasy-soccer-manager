@@ -17,6 +17,18 @@ RSpec.describe 'POST /api/v1/auth/register', type: :request do
       }.to change(User, :count).by(1)
     end
 
+    it 'creates a Team for the new user' do
+      post '/api/v1/auth/register', params: valid_params, as: :json
+
+      expect(User.last.team).to be_present
+    end
+
+    it 'creates exactly 20 players for the new team' do
+      post '/api/v1/auth/register', params: valid_params, as: :json
+
+      expect(User.last.team.players.count).to eq(20)
+    end
+
     it 'stores a refresh_token record (digest only, not raw)' do
       post '/api/v1/auth/register', params: valid_params, as: :json
 
