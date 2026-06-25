@@ -7,7 +7,7 @@ const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000/api/v
 export const ACCESS_TOKEN_KEY  = 'access_token';
 export const REFRESH_TOKEN_KEY = 'refresh_token';
 
-const client = axios.create({ baseURL: BASE_URL });
+const client = axios.create({ baseURL: BASE_URL, timeout: 10000 });
 
 // Inject access token on every request
 client.interceptors.request.use(async (config) => {
