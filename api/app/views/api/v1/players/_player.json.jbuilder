@@ -1,0 +1,11 @@
+json.id           player.id
+json.first_name   player.first_name
+json.last_name    player.last_name
+json.country      player.country
+json.position     player.position
+json.birth_date   player.birth_date.iso8601
+json.age          player.age
+json.market_value player.market_value.to_s
+json.goals        player.goals
+json.is_listed    false
+json.active_listing nil

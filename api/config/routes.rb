@@ -12,6 +12,8 @@ Rails.application.routes.draw do
         post   'refresh',  to: 'sessions#refresh'
         delete 'logout',   to: 'sessions#destroy'
       end
+      resource  :team,    only: [:show, :update]
+      resources :players, only: [:show, :update]
     end
   end
 end
