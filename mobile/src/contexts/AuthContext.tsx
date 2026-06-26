@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import client, { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '../api/client';
+import client, { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, setAuthFailureHandler } from '../api/client';
 import { AuthTokens } from '../types';
 
 interface AuthContextValue {
@@ -22,6 +22,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     SecureStore.getItemAsync(ACCESS_TOKEN_KEY)
       .then((token) => setAccessToken(token))
       .finally(() => setIsLoading(false));
+  }, []);
+
+  // Give the Axios interceptor a way to trigger logout without importing React context
+  useEffect(() => {
+    setAuthFailureHandler(clearTokens);
   }, []);
 
   const storeTokens = async (tokens: AuthTokens) => {

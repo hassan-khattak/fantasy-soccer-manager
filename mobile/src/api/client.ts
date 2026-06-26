@@ -9,6 +9,13 @@ export const REFRESH_TOKEN_KEY = 'refresh_token';
 
 const client = axios.create({ baseURL: BASE_URL, timeout: 10000 });
 
+// Registered by AuthContext on mount so the interceptor can trigger a logout
+// without importing React context (which would create a circular dependency).
+let onAuthFailure: (() => void) | null = null;
+export const setAuthFailureHandler = (handler: () => void): void => {
+  onAuthFailure = handler;
+};
+
 // Inject access token on every request
 client.interceptors.request.use(async (config) => {
   const token = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
@@ -18,7 +25,7 @@ client.interceptors.request.use(async (config) => {
   return config;
 });
 
-// On 401: attempt silent refresh, retry once, then logout
+// On 401: attempt silent refresh, retry once, then signal AuthContext to logout
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -42,9 +49,10 @@ client.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
         return client(originalRequest);
       } catch {
-        // Refresh failed — clear tokens so AuthContext navigates to auth screens
+        // Refresh failed — clear tokens and notify AuthContext to navigate to auth screens
         await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
         await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+        onAuthFailure?.();
         return Promise.reject(error);
       }
     }
