@@ -219,6 +219,41 @@
             },
             "description": "Returns the current user's team with all 20 players. Auto-saves first player_id for use in Get Player Detail."
           }
+        },
+        {
+          "name": "Update Team",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Name updated', () => pm.expect(body.name).to.eql('Updated FC'));",
+                  "pm.test('Country updated', () => pm.expect(body.country).to.eql('Spain'));",
+                  "pm.test('Has players array', () => pm.expect(body.players).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team\": {\n    \"name\": \"Updated FC\",\n    \"country\": \"Spain\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/team",
+              "host": ["{{base_url}}"],
+              "path": ["team"]
+            },
+            "description": "Update team name and/or country. Returns the full team response including players. Budget is not a permitted param."
+          }
         }
       ]
     },
@@ -254,6 +289,41 @@
               "path": ["players", "{{player_id}}"]
             },
             "description": "Returns full player detail. player_id is auto-saved by Get My Team. Transfer history is empty array until Slice 5."
+          }
+        },
+        {
+          "name": "Update Player",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('first_name updated', () => pm.expect(body.first_name).to.eql('Carlos'));",
+                  "pm.test('last_name updated', () => pm.expect(body.last_name).to.eql('Silva'));",
+                  "pm.test('country updated', () => pm.expect(body.country).to.eql('Brazil'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"player\": {\n    \"first_name\": \"Carlos\",\n    \"last_name\": \"Silva\",\n    \"country\": \"Brazil\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/players/{{player_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["players", "{{player_id}}"]
+            },
+            "description": "Update player first_name, last_name, and/or country. Returns 403 if the player does not belong to the authenticated user's team. position and market_value are ignored (strong params)."
           }
         }
       ]
