@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
   ActivityIndicator, StyleSheet, SafeAreaView,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { getTeam } from '../api/team';
 import { Team, Player } from '../types';
 import PlayerCard from '../components/PlayerCard';
@@ -33,7 +34,7 @@ export default function TeamScreen({ navigation }: Props) {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
   if (loading) {
     return (
@@ -69,8 +70,21 @@ export default function TeamScreen({ navigation }: Props) {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.teamName}>{team.name}</Text>
-        <Text style={styles.country}>{team.country}</Text>
+        <View style={styles.headerTop}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.teamName}>{team.name}</Text>
+            <Text style={styles.country}>{team.country}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={() => navigation.navigate('TeamEditor', {
+              teamName: team.name,
+              teamCountry: team.country,
+            })}
+          >
+            <Text style={styles.editBtnText}>Edit</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.statsRow}>
           <View style={styles.stat}>
             <Text style={styles.statLabel}>Team Value</Text>
@@ -103,7 +117,10 @@ export default function TeamScreen({ navigation }: Props) {
         renderItem={({ item }) => (
           <PlayerCard
             player={item}
-            onPress={() => navigation.navigate('PlayerDetail', { playerId: item.id })}
+            onPress={() => navigation.navigate('PlayerDetail', {
+              playerId: item.id,
+              isOwnPlayer: true,
+            })}
           />
         )}
         ListEmptyComponent={
@@ -123,8 +140,14 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 12,
   },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
   teamName: { fontSize: 22, fontWeight: '800', color: '#fff' },
   country:  { fontSize: 14, color: '#c8dbfa', marginTop: 2 },
+  editBtn:  { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)', marginLeft: 8, marginTop: 2 },
+  editBtnText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   statsRow: { flexDirection: 'row', marginTop: 14, gap: 24 },
   stat:      {},
   statLabel: { fontSize: 12, color: '#c8dbfa' },

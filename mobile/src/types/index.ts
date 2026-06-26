@@ -51,3 +51,16 @@ export const POSITION_LABELS: Record<Player['position'], string> = {
   MID: 'Midfielder',
   ATT: 'Attacker',
 };
+
+export const COUNTRIES: string[] = [
+  'Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil',
+  'Canada', 'Chile', 'China', 'Colombia', 'Croatia',
+  'Czech Republic', 'Denmark', 'Egypt', 'England', 'Finland',
+  'France', 'Germany', 'Ghana', 'Greece', 'Hungary',
+  'India', 'Iran', 'Ireland', 'Italy', 'Japan',
+  'Mexico', 'Morocco', 'Netherlands', 'New Zealand', 'Nigeria',
+  'Norway', 'Poland', 'Portugal', 'Romania', 'Russia',
+  'Saudi Arabia', 'Scotland', 'Senegal', 'Serbia', 'South Korea',
+  'Spain', 'Sweden', 'Switzerland', 'Tunisia', 'Turkey',
+  'Ukraine', 'United States', 'Uruguay', 'Venezuela', 'Wales',
+];

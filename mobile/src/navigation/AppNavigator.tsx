@@ -4,10 +4,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import TeamScreen from '../screens/TeamScreen';
 import PlayerDetailScreen from '../screens/PlayerDetailScreen';
+import TeamEditorScreen from '../screens/TeamEditorScreen';
 
 export type TeamStackParamList = {
   TeamHome: undefined;
-  PlayerDetail: { playerId: number };
+  PlayerDetail: { playerId: number; isOwnPlayer: boolean };
+  TeamEditor: { teamName: string; teamCountry: string };
 };
 
 const Tab   = createBottomTabNavigator();
@@ -25,6 +27,11 @@ function TeamStack() {
         name="PlayerDetail"
         component={PlayerDetailScreen}
         options={{ title: 'Player' }}
+      />
+      <Stack.Screen
+        name="TeamEditor"
+        component={TeamEditorScreen}
+        options={{ title: 'Edit Team' }}
       />
     </Stack.Navigator>
   );
