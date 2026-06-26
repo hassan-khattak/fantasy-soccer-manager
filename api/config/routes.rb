@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   # Required for Devise to mix authenticate_user! into controllers (skip generates no extra routes)
   devise_for :users, skip: :all
 
-  namespace :api do
+  namespace :api, defaults: { format: :json } do
     namespace :v1 do
       namespace :auth do
         post   'register', to: 'registrations#create'
