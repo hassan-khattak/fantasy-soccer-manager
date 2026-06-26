@@ -1,13 +1,13 @@
 module Api
   module V1
     class TeamsController < ApplicationController
+      before_action :set_team
+
       def show
-        @team    = current_user.team
         @players = @team.players
       end
 
       def update
-        @team = current_user.team
         if @team.update(team_params)
           @players = @team.players
           render :show
@@ -17,6 +17,11 @@ module Api
       end
 
       private
+
+      def set_team
+        @team = current_user.team
+        render json: { error: 'Not found' }, status: :not_found unless @team
+      end
 
       def team_params
         params.require(:team).permit(:name, :country)
