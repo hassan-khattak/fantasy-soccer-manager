@@ -51,7 +51,16 @@ export default function TransferListScreen() {
   const [activePicker, setActivePicker] = useState<PickerField | null>(null);
   const [pickerSearch, setPickerSearch] = useState('');
 
+  // Quick filter chips: null = all, 'own' = my listings, 'others' = exclude my team
+  const [quickFilter, setQuickFilter] = useState<'own' | 'others' | null>(null);
+
   const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
+
+  const displayedListings = ownTeamId !== undefined && quickFilter !== null
+    ? listings.filter(l =>
+        quickFilter === 'own' ? l.team.id === ownTeamId : l.team.id !== ownTeamId
+      )
+    : listings;
 
   // Stable load — reads all dynamic values from refs so no deps needed
   const load = useCallback(async (reset = true) => {
@@ -210,13 +219,29 @@ export default function TransferListScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Quick filter chips */}
+      <View style={styles.chipsRow}>
+        <TouchableOpacity
+          style={[styles.chip, quickFilter === 'own' && styles.chipActive]}
+          onPress={() => setQuickFilter(q => q === 'own' ? null : 'own')}
+        >
+          <Text style={[styles.chipText, quickFilter === 'own' && styles.chipTextActive]}>My Listings</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.chip, quickFilter === 'others' && styles.chipActive]}
+          onPress={() => setQuickFilter(q => q === 'others' ? null : 'others')}
+        >
+          <Text style={[styles.chipText, quickFilter === 'others' && styles.chipTextActive]}>Other Teams</Text>
+        </TouchableOpacity>
+      </View>
+
       {loading ? (
         <View style={styles.center}><ActivityIndicator size="large" color="#1a73e8" /></View>
       ) : error ? (
         <View style={styles.center}><Text style={styles.errorText}>{error}</Text></View>
       ) : (
         <FlatList
-          data={listings}
+          data={displayedListings}
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
             <TransferOfferCard
@@ -232,12 +257,16 @@ export default function TransferListScreen() {
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.3}
           ListEmptyComponent={
-            <View style={styles.center}><Text style={styles.empty}>No listings found</Text></View>
+            <View style={styles.center}>
+              <Text style={styles.empty}>
+                {quickFilter === 'own' ? 'You have no active listings' : 'No listings found'}
+              </Text>
+            </View>
           }
           ListFooterComponent={
             loadingMore ? <ActivityIndicator style={styles.footer} color="#1a73e8" /> : null
           }
-          contentContainerStyle={listings.length === 0 ? styles.flatEmpty : undefined}
+          contentContainerStyle={displayedListings.length === 0 ? styles.flatEmpty : undefined}
         />
       )}
 
@@ -410,6 +439,12 @@ const styles = StyleSheet.create({
   errorText: { color: '#c00', fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
   empty:     { color: '#999', fontSize: 15 },
   footer:    { paddingVertical: 16 },
+  chipsRow:      { flexDirection: 'row', paddingHorizontal: 12, paddingBottom: 8, gap: 8 },
+  chip:          { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd' },
+  chipActive:    { backgroundColor: '#1a73e8', borderColor: '#1a73e8' },
+  chipText:      { fontSize: 13, fontWeight: '600', color: '#555' },
+  chipTextActive:{ fontSize: 13, fontWeight: '600', color: '#fff' },
+
   fab: { position: 'absolute', right: 24, bottom: 32, width: 56, height: 56, borderRadius: 28, backgroundColor: '#1a73e8', justifyContent: 'center', alignItems: 'center', elevation: 6, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 } },
   fabText: { color: '#fff', fontSize: 28, lineHeight: 30 },
 
