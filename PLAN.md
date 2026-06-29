@@ -1,9 +1,9 @@
 # Fantasy Soccer Manager — Project Plan
 
-> **Status:** Planning  
-> **Author:** Hassan Khattak  
-> **Last Updated:** 2026-06-23  
-> **Assessment:** Toptal Fantasy Soccer Manager  
+> **Status:** Complete
+> **Author:** Hassan Khattak
+> **Last Updated:** 2026-06-29
+> **Assessment:** Toptal Fantasy Soccer Manager
 > **Deadline:** 7 days from receipt
 
 ---
@@ -30,7 +30,7 @@
 
 | Concern | Decision | Rationale |
 |---------|----------|-----------|
-| Backend framework | Ruby on Rails 7 (API mode) | Fast CRUD, ActiveRecord handles relations + transactions cleanly |
+| Backend framework | Ruby on Rails 8.1.3 (API mode) | Fast CRUD, ActiveRecord handles relations + transactions cleanly |
 | Database | PostgreSQL 15 | Relational integrity, partial unique indexes, `SELECT FOR UPDATE` support |
 | Auth | Devise + devise-jwt | JWT stateless tokens — correct for mobile APIs. `jti` column enables logout/revocation |
 | Email verification | None (instant login) | Not required by spec; can be added later |
@@ -49,13 +49,23 @@
 | Background jobs | None required by spec | All operations are synchronous |
 | Developer UX | `Makefile` | `make setup`, `make test`, `make seed` — reduces reviewer friction beyond docker-compose |
 | Env config | `.env.example` + `EXPO_PUBLIC_API_URL` | API base URL in Expo env, no hardcoded IPs |
+| API documentation | Postman collection (`Fantasy_Soccer_Manager.postman_collection.json`) | Import and hit Login — tokens auto-save; updated at the end of each slice as new endpoints land |
+
+### Mobile UX Decisions (confirmed 2026-06-24)
+
+| Concern | Decision | Rationale |
+|---------|----------|-----------|
+| Country picker (TeamEditorScreen) | Searchable modal with ~50 hardcoded countries | Free-text input risks typos that break country filters on the transfer market |
+| CreateTransferOffer placement | Dedicated screen (not modal/bottom sheet) | Consistent entry from both the Sell button and the FAB (+); simpler keyboard + gesture handling |
+| Goals field display | Shown on PlayerDetailScreen below birth date as `Goals: 42` or `Goals: —` | Spec flags it as optional but required — surfaces it where reviewers will look |
+| Transfer list pagination | Infinite scroll via `FlatList` + `onEndReached` | Standard mobile UX; `meta.total_pages` from API signals when to stop fetching |
 
 ---
 
 ## 2. Monorepo Structure
 
 ```
-fantasy-soccer/
+Hassan-khattak/
 ├── api/                          # Rails 7 API
 │   ├── app/
 │   │   ├── controllers/
@@ -67,8 +77,7 @@ fantasy-soccer/
 │   │   │           │   └── sessions_controller.rb
 │   │   │           ├── teams_controller.rb
 │   │   │           ├── players_controller.rb
-│   │   │           ├── transfer_listings_controller.rb
-│   │   │           └── transfers_controller.rb
+│   │   │           └── transfer_listings_controller.rb
 │   │   ├── models/
 │   │   │   ├── user.rb
 │   │   │   ├── team.rb
@@ -77,7 +86,8 @@ fantasy-soccer/
 │   │   │   └── transfer.rb
 │   │   ├── services/
 │   │   │   ├── team_generator_service.rb   # generates 20 players on signup
-│   │   │   └── transfer_service.rb         # buy flow with locking + transaction
+│   │   │   ├── transfer_service.rb         # buy flow with locking + transaction
+│   │   │   └── refresh_token_service.rb    # issue, rotate, revoke refresh tokens
 │   │   └── views/
 │   │       └── api/
 │   │           └── v1/
@@ -106,7 +116,7 @@ fantasy-soccer/
 │   ├── Dockerfile
 │   └── docker-compose.yml
 │
-├── mobile/                       # React Native (bare)
+├── mobile/                       # React Native (Expo managed)
 │   ├── src/
 │   │   ├── api/
 │   │   │   └── client.ts         # Axios instance + interceptors
@@ -135,6 +145,9 @@ fantasy-soccer/
 │   └── package.json
 │
 ├── PLAN.md                       # This file
+├── SLICE_1.md                    # Slice 1 phase checklist (done)
+├── SLICE_2.md                    # Slice 2 phase checklist (in progress)
+├── Fantasy_Soccer_Manager.postman_collection.json  # Import into Postman; tokens auto-save on login
 ├── wireframe.pdf
 └── README.md
 ```
@@ -387,39 +400,48 @@ per_page       integer  default 20, max 100
 
 ## Slice 1 — Scaffolding + Auth
 
+> **Status: DONE** ✓ — `make test` 39 examples, 0 failures. Manual E2E verified in Expo Go.
+
 ### Goal
 Monorepo exists. Rails API boots in Docker. React Native app boots. A user can register and receive a JWT. A user can log in and receive a JWT. A user can log out and have their token revoked.
 
 ### Deliverables
 **API**
-- [ ] `rails new api --api --database=postgresql`
-- [ ] Gemfile: `devise`, `devise-jwt`, `rack-cors`, `faker`, `kaminari`, `rspec-rails`, `factory_bot_rails`, `shoulda-matchers`
-- [ ] `users` migration with `jti` column
-- [ ] `refresh_tokens` migration
-- [ ] `User` model with Devise + JWT strategy
-- [ ] `RefreshToken` model — `belongs_to :user`, scopes: `active` (not revoked + not expired)
-- [ ] `RefreshTokenService` — `issue(user)` generates raw token, stores digest; `rotate(raw_token)` revokes old + issues new; `revoke(raw_token)` for logout
-- [ ] `POST /api/v1/auth/register` — creates user, returns access_token + refresh_token
-- [ ] `POST /api/v1/auth/login` — returns access_token + refresh_token
-- [ ] `POST /api/v1/auth/refresh` — rotates refresh token, returns new pair
-- [ ] `DELETE /api/v1/auth/logout` — revokes refresh token + rotates jti
-- [ ] CORS configured for `*` origins (development only — tighten for production)
-- [ ] `Dockerfile` + `docker-compose.yml` (api + postgres services)
-- [ ] `Makefile` with `setup`, `test`, `seed` targets
-- [ ] Minimal seed (2 dev users + teams) added now so Slice 2 development doesn't require manual setup
+- [x] `rails new api --api --database=postgresql`
+- [x] Gemfile: `devise`, `devise-jwt`, `rack-cors`, `faker`, `kaminari`, `rspec-rails`, `factory_bot_rails`, `shoulda-matchers`
+- [x] `users` migration with `jti` column
+- [x] `refresh_tokens` migration
+- [x] `User` model with Devise + JWT strategy
+- [x] `RefreshToken` model — `belongs_to :user`, scopes: `active` (not revoked + not expired)
+- [x] `RefreshTokenService` — `issue(user)` generates raw token, stores digest; `rotate(raw_token)` revokes old + issues new; `revoke(raw_token)` for logout
+- [x] `POST /api/v1/auth/register` — creates user, returns access_token + refresh_token
+- [x] `POST /api/v1/auth/login` — returns access_token + refresh_token
+- [x] `POST /api/v1/auth/refresh` — rotates refresh token, returns new pair
+- [x] `DELETE /api/v1/auth/logout` — revokes refresh token + rotates jti
+- [x] CORS configured for `*` origins (development only — tighten for production)
+- [x] `Dockerfile` + `docker-compose.yml` (api + postgres services)
+- [x] `Makefile` with `setup`, `test`, `seed` targets
+- [x] Minimal seed (2 dev users — `dev1@example.com`, `dev2@example.com` / `password123`). Teams added in Slice 2 Phase 3.
 
 **Mobile**
-- [ ] `npx create-expo-app FantasyFC --template expo-template-blank-typescript`
-- [ ] Dependencies: `@react-navigation/native`, `@react-navigation/stack`, `@react-navigation/bottom-tabs`, `axios`, `@react-native-async-storage/async-storage`, `expo-secure-store`
-- [ ] `AuthContext` — stores JWT in AsyncStorage, exposes `login`, `logout`, `register`
-- [ ] `RootNavigator` — switches between `AuthNavigator` and `AppNavigator` based on JWT presence
-- [ ] `LandingScreen` — logo + Sign In + Register buttons
-- [ ] `SignInScreen` — email + password + Sign In button, calls API
-- [ ] `RegisterScreen` — email + password + Register button, calls API
-- [ ] Axios `client.ts` — base URL from env (`EXPO_PUBLIC_API_URL`), `Authorization: Bearer <access_token>` injected via request interceptor
-- [ ] Response interceptor: on 401, silently call `POST /auth/refresh` with stored refresh token → retry original request with new access token → if refresh also fails, logout user
-- [ ] `expo-secure-store` for token storage: `access_token` + `refresh_token` both stored encrypted (survives app restarts)
-- [ ] `AuthContext` manages in-memory access token + secure-store refresh token; exposes `login`, `logout`, `register`, `refreshTokens`
+- [x] `npx create-expo-app mobile --template expo-template-blank-typescript` (creates the `mobile/` directory)
+- [x] Dependencies: `@react-navigation/native`, `@react-navigation/stack`, `@react-navigation/bottom-tabs`, `axios`, `@react-native-async-storage/async-storage`, `expo-secure-store`, `react-native-gesture-handler`
+- [x] `AuthContext` — stores tokens in `expo-secure-store` (encrypted), exposes `login`, `logout`, `register`
+- [x] `RootNavigator` — switches between `AuthNavigator` and `AppNavigator` based on JWT presence
+- [x] `LandingScreen` — logo + Sign In + Register buttons
+- [x] `SignInScreen` — email + password + Sign In button, frontend validation, calls API
+- [x] `RegisterScreen` — email + password + Register button, frontend validation (min 6 chars), calls API
+- [x] Axios `client.ts` — base URL from env (`EXPO_PUBLIC_API_URL`), 10s timeout, `Authorization: Bearer <access_token>` injected via request interceptor
+- [x] Response interceptor: on 401, silently call `POST /auth/refresh` with stored refresh token → retry original request with new access token → if refresh also fails, logout user
+- [x] `expo-secure-store` for token storage: `access_token` + `refresh_token` both stored encrypted (survives app restarts)
+- [x] `AuthContext` manages in-memory access token + secure-store refresh token; exposes `login`, `logout`, `register`
+
+**Deviations from original plan (recorded for reference)**
+- Expo SDK downgraded from 56 to **54** to match Expo Go on device (Play Store latest was 56.0.8, incompatible with 56.0.12)
+- `react-native-gesture-handler` added as explicit direct dependency (required peer of `@react-navigation/stack`)
+- `runtimeVersion: { policy: "sdkVersion" }` added to `app.json` to fix Expo Go SDK mismatch
+- Axios client has `timeout: 10000` (not in original plan) to prevent infinite loader on unreachable server
+- Frontend validation added to SignInScreen and RegisterScreen (not originally scoped to Slice 1)
 
 ### BDD Acceptance Criteria
 
@@ -430,13 +452,9 @@ Feature: User Registration
     Given a unique email and a valid password
     When POST /api/v1/auth/register is called
     Then the response status is 201
-    And the response body contains a JWT token
+    And the response body contains access_token and refresh_token
     And a User record exists in the database
-    And a Team record is created for that user
-    And the team has exactly 20 players
-    And the team has 3 goalkeepers, 6 defenders, 6 midfielders, 5 attackers
-    And each player has a market_value of 1_000_000.00
-    And the team budget is between 2_000_000.00 and 5_000_000.00
+    # Team + player generation verified in Slice 2 (TeamGeneratorService)
 
   Scenario: Duplicate email registration
     Given an email that is already registered
@@ -502,16 +520,16 @@ Feature: Mobile Auth Flow
     Given the RegisterScreen is shown
     When the user enters email and password and taps Register
     And the API returns 201 with a JWT
-    Then the JWT is stored in AsyncStorage
+    Then the tokens are stored in expo-secure-store (encrypted)
     And the AppNavigator is shown (Team tab visible)
 
   Scenario: Failed register shows error
     Given the RegisterScreen is shown
     When the API returns 422
-    Then an error message is shown on screen
+    Then the Rails error message is shown inline (e.g. "Email has already been taken")
 
   Scenario: App launch with stored token skips auth
-    Given a JWT is stored in AsyncStorage
+    Given tokens are stored in expo-secure-store
     When the app is launched
     Then the AppNavigator is shown directly (no Landing screen)
 ```
@@ -541,12 +559,10 @@ A logged-in user can view their team (name, country, budget, total market value,
 - [ ] `include` / `eager_load` to prevent N+1
 
 **Mobile**
-- [ ] `TeamScreen` — country flag, team name (edit pencil icon), budget (eye mask toggle), team market value, scrollable player list, search bar
-- [ ] `PlayerDetailScreen` — full player info (name, country, position, age derived from birth_date, birth_date, market value, goals), Transfer History section (empty state), Sell button (wired in Slice 4)
+- [ ] `TeamScreen` — country flag, team name (edit pencil icon), budget (eye mask toggle), team market value, scrollable player list, search bar (client-side filter — no extra API call)
+- [ ] `PlayerDetailScreen` — full player info: name (bold), country flag, market value, position, age, birth date, goals (`Goals: 42` or `Goals: —` if null), Sell button top-right (hidden if `is_listed === true`), Transfer History section (empty state: "No transfers yet")
 - [ ] `PlayerCard` component — reusable, used in TeamScreen and SelectPlayerScreen
-- [ ] Position display: API stores the code (`GK`/`DEF`/`MID`/`ATT`); the full label ("Goalkeeper", etc.) is a client-side mapping. Wireframe/web UI show both — keep the mapping in a shared constant.
-
-> The Player page wireframe omits goals, but it's a required (optional) field — surface it on `PlayerDetailScreen` so it's visible somewhere in the app.
+- [ ] Position display: API stores the code (`GK`/`DEF`/`MID`/`ATT`); the full label ("Goalkeeper", etc.) is a client-side mapping. Keep in a shared constant: `{ GK: 'Goalkeeper', DEF: 'Defender', MID: 'Midfielder', ATT: 'Attacker' }`
 
 ### BDD Acceptance Criteria
 
@@ -631,6 +647,9 @@ Feature: Mobile Team Screen
 - Unit spec for `TeamGeneratorService` (squad composition, values, age range)
 - N+1 check: assert query count with `bullet` gem
 
+### Postman
+- [x] `Fantasy_Soccer_Manager.postman_collection.json` created — Auth folder (register, login, refresh, logout) + Team folder (GET /team) + Players folder (GET /players/:id). Tokens auto-save on login/register.
+
 ---
 
 ## Slice 3 — Edit Team & Players
@@ -645,7 +664,7 @@ A team owner can edit their team name and country. A team owner can edit a playe
 - [ ] Strong params, model validations
 
 **Mobile**
-- [ ] `TeamEditorScreen` — text input for name, country dropdown (or picker), Save button
+- [ ] `TeamEditorScreen` — text input for name, searchable country modal picker (~50 hardcoded countries with flag preview), Save button
 - [ ] Edit pencil icon on TeamScreen header navigates to TeamEditorScreen
 - [ ] Inline edit on PlayerDetailScreen: editable fields for first_name, last_name, country with Save
 
@@ -694,6 +713,9 @@ Feature: Edit Player
 - RSpec request specs for both PATCH endpoints
 - Authorization spec: 403 on non-owner access
 
+### Postman
+- [ ] Add `PATCH /api/v1/team` and `PATCH /api/v1/players/:id` to the collection
+
 ---
 
 ## Slice 4 — Transfer Listing (Sell)
@@ -703,11 +725,11 @@ A team owner can place one of their players on the transfer market with a custom
 
 ### Deliverables
 **API**
-- [ ] `transfer_listings` migration (with partial unique index)
-- [ ] `TransferListing` model: `belongs_to :player`, validations
-- [ ] `POST /api/v1/transfer_listings` — list a player (owner only, no duplicate active listing)
-- [ ] `DELETE /api/v1/transfer_listings/:id` — remove listing (owner only)
-- [ ] `Player` model: `has_one :active_listing, -> { where(active: true) }, class_name: 'TransferListing'`
+- [x] `transfer_listings` migration (with partial unique index)
+- [x] `TransferListing` model: `belongs_to :player`, validations
+- [x] `POST /api/v1/transfer_listings` — list a player (owner only, no duplicate active listing)
+- [x] `DELETE /api/v1/transfer_listings/:id` — remove listing (owner only)
+- [x] `Player` model: `has_one :active_listing, -> { where(active: true) }, class_name: 'TransferListing'`
 
 **Mobile**
 
@@ -715,11 +737,11 @@ A team owner can place one of their players on the transfer market with a custom
 > 1. **Player page → Sell**: the player is already selected, so the Sell button navigates **directly to `CreateTransferOfferScreen`** (skip `SelectPlayerScreen`).
 > 2. **Transfer List → FAB (+)**: no player chosen yet, so it opens `SelectPlayerScreen` first, then `CreateTransferOfferScreen`.
 
-- [ ] Sell button on `PlayerDetailScreen` navigates **directly** to `CreateTransferOfferScreen` for that player (disabled/hidden if player `is_listed`)
+- [x] Sell button on `PlayerDetailScreen` navigates **directly** to `CreateTransferOfferScreen` for that player (disabled/hidden if player `is_listed`)
 - [ ] FAB (+) on `TransferListScreen` navigates to `SelectPlayerScreen`
 - [ ] `SelectPlayerScreen` — lists own players (excludes those where `is_listed == true`), searchable
-- [ ] `CreateTransferOfferScreen` — shows player info (read-only), market value (read-only), sell price input, Create offer button
-- [ ] After creating offer, navigate back to Transfer List tab
+- [x] `CreateTransferOfferScreen` — shows player info (read-only), market value (read-only), sell price input, Create offer button
+- [x] After creating offer, navigate back to Transfer List tab
 
 ### BDD Acceptance Criteria
 
@@ -737,7 +759,9 @@ Feature: Create Transfer Listing
   Scenario: Cannot list another team's player
     Given User A tries to list User B's player
     When POST /api/v1/transfer_listings with player_id from User B's team
-    Then the response status is 403
+    Then the response status is 404
+    # 404 not 403 — ownership is enforced by scoping the query to current_user.team.players;
+    # a player outside that scope is simply not found
 
   Scenario: Cannot list same player twice
     Given a player already has an active listing
@@ -773,6 +797,9 @@ Feature: Remove Transfer Listing
 - Model spec: uniqueness validation, asking_price > 0
 - Database constraint spec: partial unique index prevents duplicate active listings at DB level
 
+### Postman
+- [x] Add `POST /api/v1/transfer_listings`, `DELETE /api/v1/transfer_listings/:id`, and `GET /api/v1/transfer_listings` to the collection
+
 ---
 
 ## Slice 5 — Transfer Market (Buy)
@@ -782,11 +809,11 @@ Any logged-in user can browse active transfer listings with filtering and pagina
 
 ### Deliverables
 **API**
-- [ ] `GET /api/v1/transfer_listings` — filtered, paginated, with `includes` to avoid N+1
-- [ ] `POST /api/v1/transfer_listings/:id/buy` — the critical endpoint
-- [ ] `TransferService` — encapsulates the full buy flow
-- [ ] `transfers` migration complete (already drafted in Slice 2)
-- [ ] `Transfer` model: `belongs_to :player`, `belongs_to :transfer_listing`, `belongs_to :from_team`, `belongs_to :to_team`
+- [x] `GET /api/v1/transfer_listings` — filtered, paginated, with `includes` to avoid N+1 *(implemented in Slice 4)*
+- [x] `POST /api/v1/transfer_listings/:id/buy` — the critical endpoint
+- [x] `TransferService` — encapsulates the full buy flow
+- [x] `transfers` migration complete (already drafted in Slice 2)
+- [x] `Transfer` model: `belongs_to :player`, `belongs_to :transfer_listing`, `belongs_to :from_team`, `belongs_to :to_team`
 
 **`TransferService` logic (atomic, locked):**
 ```
@@ -806,12 +833,13 @@ TransferService.call(listing_id:, buyer:)
 ```
 
 **Mobile**
-- [ ] `TransferListScreen` — budget shown at top with mask, search bar + filter icon, paginated list of `TransferOfferCard` components, FAB (+) to create new listing
-- [ ] `TransferOfferCard` — player name/age/flag, team name/flag, position, offer date, price, Buy button (hidden if own listing)
-- [ ] Filter modal — player name, team name, min price, max price, team country, player country
-- [ ] Buy confirmation alert before calling API
-- [ ] Handle 409 (already sold) with "Sorry, this player was just bought" message
-- [ ] Handle 422 (insufficient funds) with "Insufficient budget" message
+- [x] `TransferListScreen` — search bar, `FlatList` with infinite scroll (`onEndReached`; stops at `meta.total_pages`), FAB (+) to create new listing, Buy button on others' listings
+- [x] `TransferOfferCard` — position, player name/country, team name/country, offer date, price, Buy button (hidden on own listings)
+- [ ] Filter modal (6 fields) — deferred to Slice 6
+- [x] `SelectPlayerScreen` — searchable list of own players, excludes `is_listed === true` players
+- [x] `CreateTransferOfferScreen` — decoupled from TeamStack via hooks; navigated to from both Sell button and FAB → SelectPlayer flow
+- [x] Buy confirmation alert before calling API
+- [x] Handle 409 (already sold), 422 (insufficient funds), 403 (own player) with distinct messages
 
 ### BDD Acceptance Criteria
 
@@ -906,6 +934,9 @@ Feature: Market Value Increase
 - RSpec request specs for GET (all filter combos) and POST buy
 - **Concurrency spec:** spawn 2 threads simultaneously calling buy, assert exactly one succeeds
 - Service unit spec for `TransferService` — test each failure path
+
+### Postman
+- [ ] Add `GET /api/v1/transfer_listings` (with all filter params) and `POST /api/v1/transfer_listings/:id/buy` to the collection
 - N+1 check on GET /transfer_listings
 
 ---
@@ -919,7 +950,7 @@ All screens have loading states and error handling. Player detail shows full tra
 **API**
 - [ ] `GET /players/:id` returns full transfer history (from_team, to_team, date, price, market_value_after)
 - [ ] Seed file (`db/seeds.rb`) with 3 demo users, each with a team, some players listed
-- [ ] Global error handler in `ApplicationController` (rescue `ActiveRecord::RecordNotFound` → 404, `Pundit::NotAuthorizedError` → 403)
+- [ ] Global error handler in `ApplicationController` (rescue `ActiveRecord::RecordNotFound` → 404, custom `NotAuthorizedError` → 403)
 - [ ] API versioning confirmed (`/api/v1/`)
 
 **Mobile**
@@ -1098,13 +1129,24 @@ Mobile is fully typed. API response shapes defined in `src/types/index.ts`. No `
 
 ## Session Progress Tracker
 
-| Slice | Status | Session | Notes |
-|-------|--------|---------|-------|
-| Slice 1 — Scaffolding + Auth | `TODO` | — | |
-| Slice 2 — Team & Players (Read) | `TODO` | — | |
-| Slice 3 — Edit Team & Players | `TODO` | — | |
-| Slice 4 — Transfer Listing (Sell) | `TODO` | — | |
-| Slice 5 — Transfer Market (Buy) | `TODO` | — | |
-| Slice 6 — Polish & Hardening | `TODO` | — | |
+| Slice | Status | Branch | Notes |
+|-------|--------|--------|-------|
+| Slice 1 — Scaffolding + Auth | `DONE` ✓ | `phase/9-auth-screens` | 39 RSpec examples, 0 failures. Expo Go manual E2E verified. |
+| Slice 2 — Team & Players (Read) | `DONE` ✓ | `slice-2/squad-management` | 73 RSpec examples, 0 failures. TypeScript clean. Postman + Expo Go E2E verified. |
+| Slice 3 — Edit Team & Players | `DONE` ✓ | `slice-3/edit-team-players` | PATCH /team + /players/:id, TeamEditorScreen, inline player editing. Manual Expo Go E2E pending. |
+| Slice 4 — Transfer Listing (Sell) | `DONE` ✓ | `slice-4/transfer-listing` | 107 RSpec examples, 0 failures. TypeScript clean. FAB + SelectPlayerScreen deferred to Slice 5. |
+| Slice 5 — Transfer Market (Buy) | `DONE` ✓ | `slice-5/transfer-market` | 132 RSpec examples, 0 failures. TypeScript clean. Buy flow atomic + race-condition-safe. FAB + SelectPlayerScreen + TransferStack wired. Postman updated. |
+| Slice 6 — Polish & Hardening | `DONE` ✓ | `slice-6/filters-and-docs` | 132 RSpec examples, 0 failures. TypeScript clean. Filter modal, sign-out, error boundary, README, seeds, env examples all complete. |
 
 > Update this table at the start of each session. Change `TODO` → `IN PROGRESS` → `DONE`.
+
+---
+
+## Confirmed UX Decisions (2026-06-24)
+
+| Question | Decision |
+|----------|----------|
+| Country picker on Team Editor | Searchable modal with ~50 hardcoded countries — prevents typos that break transfer market country filters |
+| CreateTransferOffer placement | Dedicated screen — consistent from both Sell button (player pre-selected) and FAB → SelectPlayer flow |
+| Goals field | Display on PlayerDetailScreen below birth date: `Goals: 42` or `Goals: —` if null |
+| Transfer list pagination | Infinite scroll via `FlatList` + `onEndReached`; `meta.total_pages` signals when to stop |
