@@ -1,14 +1,19 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, TextInput, FlatList, ActivityIndicator,
-  StyleSheet, SafeAreaView,
+  StyleSheet, SafeAreaView, Alert, TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getTransferListings } from '../api/transferListings';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { buyListing, getTransferListings } from '../api/transferListings';
+import { getTeam } from '../api/team';
 import TransferOfferCard from '../components/TransferOfferCard';
 import { TransferListing } from '../types';
+import { TransferStackParamList } from '../navigation/AppNavigator';
 
 export default function TransferListScreen() {
+  const navigation = useNavigation<StackNavigationProp<TransferStackParamList>>();
   const [listings, setListings]       = useState<TransferListing[]>([]);
   const [page, setPage]               = useState(1);
   const [totalPages, setTotalPages]   = useState(1);
@@ -16,6 +21,7 @@ export default function TransferListScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError]             = useState<string | null>(null);
   const [playerName, setPlayerName]   = useState('');
+  const [ownTeamId, setOwnTeamId]     = useState<number | undefined>(undefined);
   const searchRef = useRef(playerName);
   searchRef.current = playerName;
 
@@ -47,6 +53,7 @@ export default function TransferListScreen() {
   useFocusEffect(
     useCallback(() => {
       load(true);
+      getTeam().then(t => setOwnTeamId(t.id)).catch(() => {});
     }, [playerName])
   );
 
@@ -58,6 +65,35 @@ export default function TransferListScreen() {
 
   const handleSearch = (text: string) => {
     setPlayerName(text);
+  };
+
+  const handleBuy = (listing: TransferListing) => {
+    const price = (parseFloat(listing.asking_price) / 1_000_000).toFixed(1);
+    Alert.alert(
+      'Confirm Purchase',
+      `Buy ${listing.player.first_name} ${listing.player.last_name} for $${price}M?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Buy',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await buyListing(listing.id);
+              load(true);
+            } catch (e: any) {
+              const status = e?.response?.status;
+              const msg =
+                status === 409 ? 'This player was just sold to someone else.' :
+                status === 422 ? 'Insufficient budget.' :
+                status === 403 ? 'Cannot buy your own player.' :
+                'Purchase failed. Please try again.';
+              Alert.alert('Purchase Failed', msg);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -83,7 +119,9 @@ export default function TransferListScreen() {
         <FlatList
           data={listings}
           keyExtractor={item => String(item.id)}
-          renderItem={({ item }) => <TransferOfferCard listing={item} />}
+          renderItem={({ item }) => (
+            <TransferOfferCard listing={item} ownTeamId={ownTeamId} onBuy={handleBuy} />
+          )}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.3}
           ListEmptyComponent={
@@ -97,6 +135,12 @@ export default function TransferListScreen() {
           contentContainerStyle={listings.length === 0 ? styles.flatEmpty : undefined}
         />
       )}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('SelectPlayer')}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -119,4 +163,21 @@ const styles = StyleSheet.create({
   errorText: { color: '#c00', fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
   empty:     { color: '#999', fontSize: 15 },
   footer:    { paddingVertical: 16 },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#1a73e8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  fabText: { color: '#fff', fontSize: 28, lineHeight: 30 },
 });

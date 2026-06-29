@@ -6,6 +6,7 @@ import PlayerDetailScreen from '../screens/PlayerDetailScreen';
 import TeamEditorScreen from '../screens/TeamEditorScreen';
 import TransferListScreen from '../screens/TransferListScreen';
 import CreateTransferOfferScreen from '../screens/CreateTransferOfferScreen';
+import SelectPlayerScreen from '../screens/SelectPlayerScreen';
 
 export type TeamStackParamList = {
   TeamHome: undefined;
@@ -14,33 +15,62 @@ export type TeamStackParamList = {
   CreateTransferOffer: { playerId: number; playerName: string };
 };
 
-const Tab   = createBottomTabNavigator();
-const Stack = createStackNavigator<TeamStackParamList>();
+export type TransferStackParamList = {
+  TransferListHome: undefined;
+  SelectPlayer: undefined;
+  CreateTransferOffer: { playerId: number; playerName: string };
+};
+
+const Tab              = createBottomTabNavigator();
+const TeamStackNav     = createStackNavigator<TeamStackParamList>();
+const TransferStackNav = createStackNavigator<TransferStackParamList>();
 
 function TeamStack() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
+    <TeamStackNav.Navigator>
+      <TeamStackNav.Screen
         name="TeamHome"
         component={TeamScreen}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
+      <TeamStackNav.Screen
         name="PlayerDetail"
         component={PlayerDetailScreen}
         options={{ title: 'Player' }}
       />
-      <Stack.Screen
+      <TeamStackNav.Screen
         name="TeamEditor"
         component={TeamEditorScreen}
         options={{ title: 'Edit Team' }}
       />
-      <Stack.Screen
+      <TeamStackNav.Screen
         name="CreateTransferOffer"
         component={CreateTransferOfferScreen}
         options={{ title: 'List for Sale' }}
       />
-    </Stack.Navigator>
+    </TeamStackNav.Navigator>
+  );
+}
+
+function TransferStack() {
+  return (
+    <TransferStackNav.Navigator>
+      <TransferStackNav.Screen
+        name="TransferListHome"
+        component={TransferListScreen}
+        options={{ title: 'Transfer Market' }}
+      />
+      <TransferStackNav.Screen
+        name="SelectPlayer"
+        component={SelectPlayerScreen}
+        options={{ title: 'Select Player' }}
+      />
+      <TransferStackNav.Screen
+        name="CreateTransferOffer"
+        component={CreateTransferOfferScreen}
+        options={{ title: 'List for Sale' }}
+      />
+    </TransferStackNav.Navigator>
   );
 }
 
@@ -54,8 +84,8 @@ export default function AppNavigator() {
       />
       <Tab.Screen
         name="Transfer List"
-        component={TransferListScreen}
-        options={{ headerShown: true, title: 'Transfer Market' }}
+        component={TransferStack}
+        options={{ headerShown: false }}
       />
     </Tab.Navigator>
   );

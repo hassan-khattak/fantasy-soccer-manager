@@ -19,3 +19,6 @@ export const createListing = (playerId: number, askingPrice: string) =>
 
 export const deleteListing = (listingId: number) =>
   client.delete(`/transfer_listings/${listingId}`);
+
+export const buyListing = (listingId: number) =>
+  client.post(`/transfer_listings/${listingId}/buy`).then(r => r.data);

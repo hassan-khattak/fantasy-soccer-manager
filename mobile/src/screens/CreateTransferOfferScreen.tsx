@@ -3,17 +3,15 @@ import {
   View, Text, TextInput, TouchableOpacity, ActivityIndicator,
   StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
 import { createListing } from '../api/transferListings';
-import { TeamStackParamList } from '../navigation/AppNavigator';
 
-type Props = {
-  navigation: StackNavigationProp<TeamStackParamList, 'CreateTransferOffer'>;
-  route: RouteProp<TeamStackParamList, 'CreateTransferOffer'>;
-};
+type Params = { playerId: number; playerName: string };
 
-export default function CreateTransferOfferScreen({ navigation, route }: Props) {
+export default function CreateTransferOfferScreen() {
+  const navigation = useNavigation<StackNavigationProp<any>>();
+  const route = useRoute<RouteProp<{ CreateTransferOffer: Params }, 'CreateTransferOffer'>>();
   const { playerId, playerName } = route.params;
 
   const [askingPrice, setAskingPrice] = useState('');

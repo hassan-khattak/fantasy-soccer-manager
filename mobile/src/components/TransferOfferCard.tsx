@@ -5,9 +5,11 @@ import { TransferListing, POSITION_LABELS } from '../types';
 interface Props {
   listing: TransferListing;
   onPress?: () => void;
+  ownTeamId?: number;
+  onBuy?: (listing: TransferListing) => void;
 }
 
-export default function TransferOfferCard({ listing, onPress }: Props) {
+export default function TransferOfferCard({ listing, onPress, ownTeamId, onBuy }: Props) {
   const { player, team, asking_price, created_at } = listing;
   const price = (parseFloat(asking_price) / 1_000_000).toFixed(1);
 
@@ -29,7 +31,14 @@ export default function TransferOfferCard({ listing, onPress }: Props) {
       </View>
       <View style={styles.bottom}>
         <Text style={styles.teamText}>{team.name} · {team.country}</Text>
-        <Text style={styles.dateText}>{created_at.slice(0, 10)}</Text>
+        <View style={styles.bottomRight}>
+          <Text style={styles.dateText}>{created_at.slice(0, 10)}</Text>
+          {ownTeamId !== undefined && listing.team.id !== ownTeamId && onBuy && (
+            <TouchableOpacity style={styles.buyBtn} onPress={() => onBuy(listing)}>
+              <Text style={styles.buyBtnText}>Buy</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -70,10 +79,14 @@ const styles = StyleSheet.create({
   bottom: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
     paddingTop: 8,
   },
+  bottomRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   teamText: { fontSize: 13, color: '#555' },
   dateText: { fontSize: 13, color: '#999' },
+  buyBtn:     { backgroundColor: '#27ae60', borderRadius: 6, paddingHorizontal: 14, paddingVertical: 6 },
+  buyBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 });
