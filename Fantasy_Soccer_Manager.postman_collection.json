@@ -29,6 +29,11 @@
       "key": "listing_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "listing_id_to_buy",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -433,10 +438,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
                   "const body = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
                   "pm.test('data is array', () => pm.expect(body.data).to.be.an('array'));",
-                  "pm.test('meta has total_count', () => pm.expect(body.meta).to.have.property('total_count'));"
+                  "pm.test('meta has total_count', () => pm.expect(body.meta).to.have.property('total_count'));",
+                  "// Save first listing id for the Buy request (manual: pick one not from your team)",
+                  "if (body.data.length > 0) {",
+                  "  pm.collectionVariables.set('listing_id_to_buy', body.data[0].id);",
+                  "}"
                 ]
               }
             }
@@ -479,6 +488,43 @@
                   "pm.test('Status 201', () => pm.response.to.have.status(201));",
                   "const body = pm.response.json();",
                   "pm.collectionVariables.set('listing_id', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buy Player",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transfer_listings/{{listing_id_to_buy}}/buy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer_listings",
+                "{{listing_id_to_buy}}",
+                "buy"
+              ]
+            },
+            "description": "Buy a player from the transfer market. listing_id_to_buy is auto-saved by GET Transfer Listings (first result). For a clean E2E test, log in as a different user from the one who listed the player."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('message is Transfer successful', () => pm.expect(body.message).to.eql('Transfer successful'));"
                 ]
               }
             }
