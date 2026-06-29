@@ -7,7 +7,7 @@ module Api
 
       def update
         @player = Player.includes(:active_listing).find(params[:id])
-        return render json: { error: 'Forbidden' }, status: :forbidden unless @player.team.user == current_user
+        raise NotAuthorizedError unless @player.team.user == current_user
 
         if @player.update(player_params)
           render :show
