@@ -2,11 +2,11 @@ module Api
   module V1
     class PlayersController < ApplicationController
       def show
-        @player = Player.find(params[:id])
+        @player = Player.includes(:active_listing).find(params[:id])
       end
 
       def update
-        @player = Player.find(params[:id])
+        @player = Player.includes(:active_listing).find(params[:id])
         return render json: { error: 'Forbidden' }, status: :forbidden unless @player.team.user == current_user
 
         if @player.update(player_params)

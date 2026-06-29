@@ -80,3 +80,28 @@ RSpec.describe 'PATCH /api/v1/team', type: :request do
     end
   end
 end
+
+RSpec.describe 'GET /api/v1/team — is_listed field', type: :request do
+  let(:user)     { create(:user) }
+  let!(:team)    { create(:team, user: user) }
+  let!(:players) { create_list(:player, 20, team: team) }
+  let(:headers)  { auth_headers(user) }
+
+  context 'when a player is listed' do
+    let!(:listing) { create(:transfer_listing, player: players.first) }
+
+    it 'returns is_listed true and active_listing for that player' do
+      get '/api/v1/team', headers: headers, as: :json
+      listed = json['players'].find { |p| p['id'] == players.first.id }
+      expect(listed['is_listed']).to be true
+      expect(listed['active_listing']).to include('id', 'asking_price')
+    end
+
+    it 'returns is_listed false and null active_listing for unlisted players' do
+      get '/api/v1/team', headers: headers, as: :json
+      unlisted = json['players'].find { |p| p['id'] == players.last.id }
+      expect(unlisted['is_listed']).to be false
+      expect(unlisted['active_listing']).to be_nil
+    end
+  end
+end

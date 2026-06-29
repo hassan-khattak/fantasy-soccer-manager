@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       end
       resource  :team,    only: [:show, :update]
       resources :players, only: [:show, :update]
+      resources :transfer_listings, only: [:index, :create, :destroy]
     end
   end
 end
