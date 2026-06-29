@@ -3,6 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import AuthNavigator from './AuthNavigator';
 import AppNavigator from './AppNavigator';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function RootNavigator() {
   const { accessToken, isLoading } = useAuth();
@@ -15,5 +16,9 @@ export default function RootNavigator() {
     );
   }
 
-  return accessToken ? <AppNavigator /> : <AuthNavigator />;
+  return (
+    <ErrorBoundary>
+      {accessToken ? <AppNavigator /> : <AuthNavigator />}
+    </ErrorBoundary>
+  );
 }

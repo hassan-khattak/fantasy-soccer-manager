@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
-  ActivityIndicator, StyleSheet, SafeAreaView,
+  ActivityIndicator, StyleSheet, SafeAreaView, Alert,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -9,12 +9,26 @@ import { getTeam } from '../api/team';
 import { Team, Player } from '../types';
 import PlayerCard from '../components/PlayerCard';
 import { TeamStackParamList } from '../navigation/AppNavigator';
+import { useAuth } from '../contexts/AuthContext';
 
 type Props = {
   navigation: StackNavigationProp<TeamStackParamList, 'TeamHome'>;
 };
 
 export default function TeamScreen({ navigation }: Props) {
+  const { logout } = useAuth();
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Sign Out', style: 'destructive', onPress: logout },
+      ]
+    );
+  };
+
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +97,9 @@ export default function TeamScreen({ navigation }: Props) {
             })}
           >
             <Text style={styles.editBtnText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
+            <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.statsRow}>
@@ -171,4 +188,6 @@ const styles = StyleSheet.create({
   errorText: { color: '#c00', fontSize: 15, marginBottom: 16, textAlign: 'center', paddingHorizontal: 24 },
   retryBtn: { backgroundColor: '#1a73e8', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 8 },
   retryText: { color: '#fff', fontWeight: '700' },
+  signOutBtn:  { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: 'rgba(255,80,80,0.6)', marginLeft: 8, marginTop: 2 },
+  signOutText: { color: '#ffb3b3', fontSize: 13, fontWeight: '600' },
 });
