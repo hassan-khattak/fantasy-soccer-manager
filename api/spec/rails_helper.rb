@@ -47,6 +47,12 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include RequestHelpers, type: :request
 
+  config.around(:each, :truncation) do |example|
+    DatabaseCleaner.strategy = :truncation
+    example.run
+    DatabaseCleaner.strategy = :transaction
+  end
+
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
   ]

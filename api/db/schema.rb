@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_27_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_29_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_27_000001) do
     t.index ["player_id"], name: "one_active_listing_per_player", unique: true, where: "(active = true)"
   end
 
+  create_table "transfers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "from_team_id", null: false
+    t.decimal "market_value_after", precision: 15, scale: 2, null: false
+    t.bigint "player_id", null: false
+    t.decimal "price", precision: 15, scale: 2, null: false
+    t.bigint "to_team_id", null: false
+    t.bigint "transfer_listing_id", null: false
+    t.index ["from_team_id"], name: "index_transfers_on_from_team_id"
+    t.index ["player_id"], name: "index_transfers_on_player_id"
+    t.index ["to_team_id"], name: "index_transfers_on_to_team_id"
+    t.index ["transfer_listing_id"], name: "index_transfers_on_transfer_listing_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -79,4 +93,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_27_000001) do
   add_foreign_key "refresh_tokens", "users"
   add_foreign_key "teams", "users"
   add_foreign_key "transfer_listings", "players"
+  add_foreign_key "transfers", "players"
+  add_foreign_key "transfers", "teams", column: "from_team_id"
+  add_foreign_key "transfers", "teams", column: "to_team_id"
+  add_foreign_key "transfers", "transfer_listings"
 end

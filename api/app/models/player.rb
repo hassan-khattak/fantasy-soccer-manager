@@ -7,6 +7,7 @@ class Player < ApplicationRecord
            class_name: 'TransferListing',
            dependent:  :destroy
   has_many :transfer_listings, dependent: :destroy
+  has_many :transfers, dependent: :destroy
 
   validates :first_name,   presence: true
   validates :last_name,    presence: true
