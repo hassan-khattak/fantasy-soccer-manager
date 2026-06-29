@@ -45,6 +45,19 @@ export interface PlayerDetail extends Player {
   transfers: Transfer[];
 }
 
+export interface TransferListing {
+  id: number;
+  asking_price: string;
+  created_at: string;
+  player: Player;
+  team: { id: number; name: string; country: string };
+}
+
+export interface TransferListingsResponse {
+  data: TransferListing[];
+  meta: { total_count: number; current_page: number; total_pages: number };
+}
+
 export const POSITION_LABELS: Record<Player['position'], string> = {
   GK:  'Goalkeeper',
   DEF: 'Defender',

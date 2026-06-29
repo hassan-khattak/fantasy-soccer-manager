@@ -1,15 +1,17 @@
 import React from 'react';
-import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import TeamScreen from '../screens/TeamScreen';
 import PlayerDetailScreen from '../screens/PlayerDetailScreen';
 import TeamEditorScreen from '../screens/TeamEditorScreen';
+import TransferListScreen from '../screens/TransferListScreen';
+import CreateTransferOfferScreen from '../screens/CreateTransferOfferScreen';
 
 export type TeamStackParamList = {
   TeamHome: undefined;
   PlayerDetail: { playerId: number; isOwnPlayer: boolean };
   TeamEditor: { teamName: string; teamCountry: string };
+  CreateTransferOffer: { playerId: number; playerName: string };
 };
 
 const Tab   = createBottomTabNavigator();
@@ -33,15 +35,12 @@ function TeamStack() {
         component={TeamEditorScreen}
         options={{ title: 'Edit Team' }}
       />
+      <Stack.Screen
+        name="CreateTransferOffer"
+        component={CreateTransferOfferScreen}
+        options={{ title: 'List for Sale' }}
+      />
     </Stack.Navigator>
-  );
-}
-
-function TransferListStub() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ color: '#999', fontSize: 15 }}>Transfer Market — coming in Slice 4</Text>
-    </View>
   );
 }
 
@@ -55,7 +54,8 @@ export default function AppNavigator() {
       />
       <Tab.Screen
         name="Transfer List"
-        component={TransferListStub}
+        component={TransferListScreen}
+        options={{ headerShown: true, title: 'Transfer Market' }}
       />
     </Tab.Navigator>
   );

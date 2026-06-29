@@ -6,6 +6,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { getPlayer, updatePlayer } from '../api/players';
+import { deleteListing } from '../api/transferListings';
 import { PlayerDetail, POSITION_LABELS, COUNTRIES } from '../types';
 import { TeamStackParamList } from '../navigation/AppNavigator';
 
@@ -29,6 +30,7 @@ export default function PlayerDetailScreen({ navigation, route }: Props) {
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [saving, setSaving]                 = useState(false);
   const [saveError, setSaveError]           = useState<string | null>(null);
+  const [removingListing, setRemovingListing] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -189,6 +191,41 @@ export default function PlayerDetailScreen({ navigation, route }: Props) {
             </>
           )}
 
+          {/* Sell / Remove listing */}
+          {isOwnPlayer && !isEditing && (
+            player.is_listed ? (
+              <TouchableOpacity
+                style={[styles.removeBtn, removingListing && styles.saveBtnDisabled]}
+                disabled={removingListing}
+                onPress={async () => {
+                  if (!player.active_listing) return;
+                  setRemovingListing(true);
+                  try {
+                    await deleteListing(player.active_listing.id);
+                    await load();
+                  } finally {
+                    setRemovingListing(false);
+                  }
+                }}
+              >
+                {removingListing
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.saveBtnText}>Remove Listing</Text>
+                }
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.saveBtn}
+                onPress={() => navigation.navigate('CreateTransferOffer', {
+                  playerId: player.id,
+                  playerName: `${player.first_name} ${player.last_name}`,
+                })}
+              >
+                <Text style={styles.saveBtnText}>List for Sale</Text>
+              </TouchableOpacity>
+            )
+          )}
+
           {/* Transfer history */}
           <Text style={styles.sectionTitle}>Transfer History</Text>
           {player.transfers.length === 0 ? (
@@ -300,6 +337,7 @@ const styles = StyleSheet.create({
 
   saveError: { color: '#c00', fontSize: 14, marginBottom: 8, textAlign: 'center' },
   saveBtn:   { backgroundColor: '#1a73e8', borderRadius: 10, paddingVertical: 14, alignItems: 'center', marginBottom: 24 },
+  removeBtn: { backgroundColor: '#c0392b', borderRadius: 10, paddingVertical: 14, alignItems: 'center', marginBottom: 24 },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 
