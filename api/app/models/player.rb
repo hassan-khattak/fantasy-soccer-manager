@@ -2,6 +2,11 @@ class Player < ApplicationRecord
   POSITIONS = %w[GK DEF MID ATT].freeze
 
   belongs_to :team
+  has_one  :active_listing,
+           -> { where(active: true) },
+           class_name: 'TransferListing',
+           dependent:  :destroy
+  has_many :transfer_listings, dependent: :destroy
 
   validates :first_name,   presence: true
   validates :last_name,    presence: true
