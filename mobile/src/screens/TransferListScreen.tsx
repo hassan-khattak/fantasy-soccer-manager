@@ -13,70 +13,101 @@ import TransferOfferCard from '../components/TransferOfferCard';
 import { TransferListing, FilterState, DEFAULT_FILTERS, COUNTRIES } from '../types';
 import { TransferStackParamList } from '../navigation/AppNavigator';
 
+type PickerField = 'team_name' | 'team_country' | 'player_country';
+
+const PICKER_TITLES: Record<PickerField, string> = {
+  team_name:      'Team Name',
+  team_country:   'Team Country',
+  player_country: 'Player Country',
+};
+
 export default function TransferListScreen() {
   const navigation = useNavigation<StackNavigationProp<TransferStackParamList>>();
 
   const [listings, setListings]       = useState<TransferListing[]>([]);
-  const [page, setPage]               = useState(1);
   const [totalPages, setTotalPages]   = useState(1);
   const [loading, setLoading]         = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError]             = useState<string | null>(null);
   const [ownTeamId, setOwnTeamId]     = useState<number | undefined>(undefined);
 
-  // Quick search (player name)
-  const [playerName, setPlayerName]   = useState('');
-  const searchRef = useRef(playerName);
-  searchRef.current = playerName;
+  // Player name quick-search — ref keeps load() from going stale
+  const [playerName, setPlayerName] = useState('');
+  const searchRef = useRef('');
 
-  // Advanced filters
-  const [filters, setFilters]             = useState<FilterState>(DEFAULT_FILTERS);
-  const [draftFilters, setDraftFilters]   = useState<FilterState>(DEFAULT_FILTERS);
+  // Filters — ref lets applyFilters call load() synchronously with new values
+  const [filters, setFilters]           = useState<FilterState>(DEFAULT_FILTERS);
+  const filtersRef                      = useRef<FilterState>(DEFAULT_FILTERS);
+  const [draftFilters, setDraftFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [showFilterModal, setShowFilterModal] = useState(false);
 
-  // Nested country pickers inside the filter modal
-  const [showTeamCountryPicker, setShowTeamCountryPicker]     = useState(false);
-  const [showPlayerCountryPicker, setShowPlayerCountryPicker] = useState(false);
-  const [teamCountrySearch, setTeamCountrySearch]             = useState('');
-  const [playerCountrySearch, setPlayerCountrySearch]         = useState('');
+  // Page ref so load() doesn't close over stale page state
+  const pageRef = useRef(1);
+
+  // Team name picker options (accumulated from loaded listings)
+  const [allTeamNames, setAllTeamNames] = useState<string[]>([]);
+
+  // Single active picker inside the filter modal (no nested modals)
+  const [activePicker, setActivePicker] = useState<PickerField | null>(null);
+  const [pickerSearch, setPickerSearch] = useState('');
 
   const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
 
+  // Stable load — reads all dynamic values from refs so no deps needed
   const load = useCallback(async (reset = true) => {
     const currentSearch  = searchRef.current;
+    const currentFilters = filtersRef.current;
+    const currentPage    = pageRef.current;
+
     if (reset) { setLoading(true); setError(null); }
     else        { setLoadingMore(true); }
+
     try {
-      const nextPage = reset ? 1 : page + 1;
+      const nextPage = reset ? 1 : currentPage + 1;
       const result = await getTransferListings({
-        player_name:    currentSearch || undefined,
-        team_name:      filters.team_name      || undefined,
-        min_price:      filters.min_price       || undefined,
-        max_price:      filters.max_price       || undefined,
-        team_country:   filters.team_country    || undefined,
-        player_country: filters.player_country  || undefined,
+        player_name:    currentSearch                 || undefined,
+        team_name:      currentFilters.team_name      || undefined,
+        min_price:      currentFilters.min_price      || undefined,
+        max_price:      currentFilters.max_price      || undefined,
+        team_country:   currentFilters.team_country   || undefined,
+        player_country: currentFilters.player_country || undefined,
         page: nextPage,
       });
+
       setListings(prev => reset ? result.data : [...prev, ...result.data]);
-      setPage(nextPage);
+      pageRef.current = nextPage;
       setTotalPages(result.meta.total_pages);
+
+      // Accumulate team names for the picker from loads without a team_name filter
+      if (!currentFilters.team_name) {
+        setAllTeamNames(prev => {
+          const merged = new Set([...prev, ...result.data.map(l => l.team.name)]);
+          return [...merged].sort();
+        });
+      }
     } catch {
       setError('Failed to load listings. Please try again.');
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [page, filters]);
+  }, []); // no deps — reads dynamic values via refs
 
   useFocusEffect(
     useCallback(() => {
       load(true);
       getTeam().then(t => setOwnTeamId(t.id)).catch(() => {});
-    }, [playerName, filters])
+    }, [load]) // load is stable, fires only on screen focus
   );
 
   const handleEndReached = () => {
-    if (!loadingMore && page < totalPages) load(false);
+    if (!loadingMore && pageRef.current < totalPages) load(false);
+  };
+
+  const handlePlayerNameChange = (text: string) => {
+    setPlayerName(text);
+    searchRef.current = text;
+    load(true);
   };
 
   const handleBuy = (listing: TransferListing) => {
@@ -110,24 +141,51 @@ export default function TransferListScreen() {
 
   const openFilterModal = () => {
     setDraftFilters(filters);
-    setTeamCountrySearch('');
-    setPlayerCountrySearch('');
+    setActivePicker(null);
+    setPickerSearch('');
     setShowFilterModal(true);
   };
 
+  const openPicker = (field: PickerField) => {
+    setPickerSearch('');
+    setActivePicker(field);
+  };
+
   const applyFilters = () => {
-    setFilters(draftFilters);
+    const newFilters = draftFilters;
+    filtersRef.current = newFilters;
+    setFilters(newFilters);
     setShowFilterModal(false);
+    load(true);
   };
 
   const clearFilters = () => {
-    setDraftFilters(DEFAULT_FILTERS);
+    filtersRef.current = DEFAULT_FILTERS;
     setFilters(DEFAULT_FILTERS);
+    setDraftFilters(DEFAULT_FILTERS);
     setShowFilterModal(false);
+    load(true);
   };
 
-  const filteredTeamCountries   = COUNTRIES.filter(c => c.toLowerCase().includes(teamCountrySearch.toLowerCase()));
-  const filteredPlayerCountries = COUNTRIES.filter(c => c.toLowerCase().includes(playerCountrySearch.toLowerCase()));
+  // Options for whichever picker is active
+  const pickerOptions = (): string[] => {
+    if (activePicker === 'team_name')      return allTeamNames;
+    if (activePicker === 'team_country')   return COUNTRIES;
+    if (activePicker === 'player_country') return COUNTRIES;
+    return [];
+  };
+
+  const filteredPickerOptions = pickerOptions().filter(o =>
+    o.toLowerCase().includes(pickerSearch.toLowerCase())
+  );
+
+  const pickerCurrentValue = activePicker ? draftFilters[activePicker] : '';
+
+  const handlePickerSelect = (value: string) => {
+    if (!activePicker) return;
+    setDraftFilters(f => ({ ...f, [activePicker]: value }));
+    setActivePicker(null);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -138,12 +196,12 @@ export default function TransferListScreen() {
           placeholder="Search by player name..."
           placeholderTextColor="#999"
           value={playerName}
-          onChangeText={setPlayerName}
+          onChangeText={handlePlayerNameChange}
           returnKeyType="search"
           clearButtonMode="while-editing"
         />
         <TouchableOpacity style={styles.filterBtn} onPress={openFilterModal}>
-          <Text style={styles.filterIcon}>⚙</Text>
+          <Text style={styles.filterIcon}>▼</Text>
           {activeFilterCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{activeFilterCount}</Text>
@@ -161,7 +219,15 @@ export default function TransferListScreen() {
           data={listings}
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
-            <TransferOfferCard listing={item} ownTeamId={ownTeamId} onBuy={handleBuy} />
+            <TransferOfferCard
+              listing={item}
+              ownTeamId={ownTeamId}
+              onBuy={handleBuy}
+              onPress={() => navigation.navigate('PlayerDetail', {
+                playerId: item.player.id,
+                isOwnPlayer: ownTeamId !== undefined && item.team.id === ownTeamId,
+              })}
+            />
           )}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.3}
@@ -180,168 +246,141 @@ export default function TransferListScreen() {
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
-      {/* Filter modal */}
+      {/* Single filter modal — pickers rendered inline, no nested modals */}
       <Modal visible={showFilterModal} animationType="slide">
         <SafeAreaView style={styles.modal}>
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            {/* Modal header */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filters</Text>
-              <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                <Text style={styles.modalClose}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
-              <Text style={styles.fieldLabel}>Team Name</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={draftFilters.team_name}
-                onChangeText={v => setDraftFilters(f => ({ ...f, team_name: v }))}
-                placeholder="e.g. Barcelona"
-                placeholderTextColor="#999"
-                clearButtonMode="while-editing"
-              />
-
-              <Text style={styles.fieldLabel}>Min Price ($)</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={draftFilters.min_price}
-                onChangeText={v => setDraftFilters(f => ({ ...f, min_price: v }))}
-                placeholder="e.g. 1000000"
-                placeholderTextColor="#999"
-                keyboardType="numeric"
-                clearButtonMode="while-editing"
-              />
-
-              <Text style={styles.fieldLabel}>Max Price ($)</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={draftFilters.max_price}
-                onChangeText={v => setDraftFilters(f => ({ ...f, max_price: v }))}
-                placeholder="e.g. 5000000"
-                placeholderTextColor="#999"
-                keyboardType="numeric"
-                clearButtonMode="while-editing"
-              />
-
-              <Text style={styles.fieldLabel}>Team Country</Text>
-              <TouchableOpacity
-                style={styles.pickerBtn}
-                onPress={() => { setTeamCountrySearch(''); setShowTeamCountryPicker(true); }}
-              >
-                <Text style={draftFilters.team_country ? styles.pickerValue : styles.pickerPlaceholder}>
-                  {draftFilters.team_country || 'Any country'}
-                </Text>
-                <Text style={styles.chevron}>›</Text>
-              </TouchableOpacity>
-              {draftFilters.team_country !== '' && (
-                <TouchableOpacity onPress={() => setDraftFilters(f => ({ ...f, team_country: '' }))}>
-                  <Text style={styles.clearField}>Clear</Text>
+          {activePicker ? (
+            /* ── Inline picker view ── */
+            <>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity onPress={() => setActivePicker(null)}>
+                  <Text style={styles.modalClose}>‹ Back</Text>
                 </TouchableOpacity>
-              )}
-
-              <Text style={styles.fieldLabel}>Player Country</Text>
-              <TouchableOpacity
-                style={styles.pickerBtn}
-                onPress={() => { setPlayerCountrySearch(''); setShowPlayerCountryPicker(true); }}
-              >
-                <Text style={draftFilters.player_country ? styles.pickerValue : styles.pickerPlaceholder}>
-                  {draftFilters.player_country || 'Any country'}
-                </Text>
-                <Text style={styles.chevron}>›</Text>
-              </TouchableOpacity>
-              {draftFilters.player_country !== '' && (
-                <TouchableOpacity onPress={() => setDraftFilters(f => ({ ...f, player_country: '' }))}>
-                  <Text style={styles.clearField}>Clear</Text>
+                <Text style={styles.modalTitle}>{PICKER_TITLES[activePicker]}</Text>
+                <View style={{ width: 60 }} />
+              </View>
+              <TextInput
+                style={styles.modalSearch}
+                placeholder="Search..."
+                placeholderTextColor="#999"
+                value={pickerSearch}
+                onChangeText={setPickerSearch}
+                autoFocus
+              />
+              <FlatList
+                data={filteredPickerOptions}
+                keyExtractor={item => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.optionRow}
+                    onPress={() => handlePickerSelect(item)}
+                  >
+                    <Text style={[styles.optionText, item === pickerCurrentValue && styles.optionTextSelected]}>
+                      {item}
+                    </Text>
+                    {item === pickerCurrentValue && <Text style={styles.checkmark}>✓</Text>}
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <View style={styles.center}>
+                    <Text style={styles.empty}>
+                      {activePicker === 'team_name' && allTeamNames.length === 0
+                        ? 'No teams loaded yet'
+                        : 'No results'}
+                    </Text>
+                  </View>
+                }
+                contentContainerStyle={filteredPickerOptions.length === 0 ? { flex: 1 } : undefined}
+              />
+            </>
+          ) : (
+            /* ── Filter form ── */
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Filters</Text>
+                <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                  <Text style={styles.modalClose}>Cancel</Text>
                 </TouchableOpacity>
-              )}
-            </ScrollView>
+              </View>
 
-            {/* Action buttons */}
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.clearBtn} onPress={clearFilters}>
-                <Text style={styles.clearBtnText}>Clear All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.applyBtn} onPress={applyFilters}>
-                <Text style={styles.applyBtnText}>Apply Filters</Text>
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </Modal>
+              <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
+                {/* Team Name */}
+                <Text style={styles.fieldLabel}>Team Name</Text>
+                <TouchableOpacity style={styles.pickerBtn} onPress={() => openPicker('team_name')}>
+                  <Text style={draftFilters.team_name ? styles.pickerValue : styles.pickerPlaceholder}>
+                    {draftFilters.team_name || 'Any team'}
+                  </Text>
+                  <Text style={styles.chevron}>›</Text>
+                </TouchableOpacity>
+                {draftFilters.team_name !== '' && (
+                  <TouchableOpacity onPress={() => setDraftFilters(f => ({ ...f, team_name: '' }))}>
+                    <Text style={styles.clearField}>Clear</Text>
+                  </TouchableOpacity>
+                )}
 
-      {/* Team country picker */}
-      <Modal visible={showTeamCountryPicker} animationType="slide">
-        <SafeAreaView style={styles.modal}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Team Country</Text>
-            <TouchableOpacity onPress={() => setShowTeamCountryPicker(false)}>
-              <Text style={styles.modalClose}>Done</Text>
-            </TouchableOpacity>
-          </View>
-          <TextInput
-            style={styles.modalSearch}
-            placeholder="Search..."
-            placeholderTextColor="#999"
-            value={teamCountrySearch}
-            onChangeText={setTeamCountrySearch}
-            autoFocus
-          />
-          <FlatList
-            data={filteredTeamCountries}
-            keyExtractor={item => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.countryRow}
-                onPress={() => {
-                  setDraftFilters(f => ({ ...f, team_country: item }));
-                  setShowTeamCountryPicker(false);
-                }}
-              >
-                <Text style={[styles.countryText, item === draftFilters.team_country && styles.countryTextSelected]}>
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
-        </SafeAreaView>
-      </Modal>
+                {/* Min Price */}
+                <Text style={styles.fieldLabel}>Min Price ($)</Text>
+                <TextInput
+                  style={styles.fieldInput}
+                  value={draftFilters.min_price}
+                  onChangeText={v => setDraftFilters(f => ({ ...f, min_price: v }))}
+                  placeholder="e.g. 1000000"
+                  placeholderTextColor="#999"
+                  keyboardType="numeric"
+                  clearButtonMode="while-editing"
+                />
 
-      {/* Player country picker */}
-      <Modal visible={showPlayerCountryPicker} animationType="slide">
-        <SafeAreaView style={styles.modal}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Player Country</Text>
-            <TouchableOpacity onPress={() => setShowPlayerCountryPicker(false)}>
-              <Text style={styles.modalClose}>Done</Text>
-            </TouchableOpacity>
-          </View>
-          <TextInput
-            style={styles.modalSearch}
-            placeholder="Search..."
-            placeholderTextColor="#999"
-            value={playerCountrySearch}
-            onChangeText={setPlayerCountrySearch}
-            autoFocus
-          />
-          <FlatList
-            data={filteredPlayerCountries}
-            keyExtractor={item => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.countryRow}
-                onPress={() => {
-                  setDraftFilters(f => ({ ...f, player_country: item }));
-                  setShowPlayerCountryPicker(false);
-                }}
-              >
-                <Text style={[styles.countryText, item === draftFilters.player_country && styles.countryTextSelected]}>
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
+                {/* Max Price */}
+                <Text style={styles.fieldLabel}>Max Price ($)</Text>
+                <TextInput
+                  style={styles.fieldInput}
+                  value={draftFilters.max_price}
+                  onChangeText={v => setDraftFilters(f => ({ ...f, max_price: v }))}
+                  placeholder="e.g. 5000000"
+                  placeholderTextColor="#999"
+                  keyboardType="numeric"
+                  clearButtonMode="while-editing"
+                />
+
+                {/* Team Country */}
+                <Text style={styles.fieldLabel}>Team Country</Text>
+                <TouchableOpacity style={styles.pickerBtn} onPress={() => openPicker('team_country')}>
+                  <Text style={draftFilters.team_country ? styles.pickerValue : styles.pickerPlaceholder}>
+                    {draftFilters.team_country || 'Any country'}
+                  </Text>
+                  <Text style={styles.chevron}>›</Text>
+                </TouchableOpacity>
+                {draftFilters.team_country !== '' && (
+                  <TouchableOpacity onPress={() => setDraftFilters(f => ({ ...f, team_country: '' }))}>
+                    <Text style={styles.clearField}>Clear</Text>
+                  </TouchableOpacity>
+                )}
+
+                {/* Player Country */}
+                <Text style={styles.fieldLabel}>Player Country</Text>
+                <TouchableOpacity style={styles.pickerBtn} onPress={() => openPicker('player_country')}>
+                  <Text style={draftFilters.player_country ? styles.pickerValue : styles.pickerPlaceholder}>
+                    {draftFilters.player_country || 'Any country'}
+                  </Text>
+                  <Text style={styles.chevron}>›</Text>
+                </TouchableOpacity>
+                {draftFilters.player_country !== '' && (
+                  <TouchableOpacity onPress={() => setDraftFilters(f => ({ ...f, player_country: '' }))}>
+                    <Text style={styles.clearField}>Clear</Text>
+                  </TouchableOpacity>
+                )}
+              </ScrollView>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.clearBtn} onPress={clearFilters}>
+                  <Text style={styles.clearBtnText}>Clear All</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.applyBtn} onPress={applyFilters}>
+                  <Text style={styles.applyBtnText}>Apply Filters</Text>
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          )}
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -364,23 +403,23 @@ const styles = StyleSheet.create({
   },
   filterBtn: { position: 'relative', padding: 10, backgroundColor: '#fff', borderRadius: 10, borderWidth: 1, borderColor: '#ddd', justifyContent: 'center', alignItems: 'center' },
   filterIcon: { fontSize: 18, color: '#1a73e8' },
-  badge:      { position: 'absolute', top: -4, right: -4, backgroundColor: '#e53935', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center' },
-  badgeText:  { color: '#fff', fontSize: 10, fontWeight: '700' },
-  center:     { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
-  flatEmpty:  { flexGrow: 1 },
-  errorText:  { color: '#c00', fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-  empty:      { color: '#999', fontSize: 15 },
-  footer:     { paddingVertical: 16 },
+  badge:     { position: 'absolute', top: -4, right: -4, backgroundColor: '#e53935', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center' },
+  badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+  center:    { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
+  flatEmpty: { flexGrow: 1 },
+  errorText: { color: '#c00', fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
+  empty:     { color: '#999', fontSize: 15 },
+  footer:    { paddingVertical: 16 },
   fab: { position: 'absolute', right: 24, bottom: 32, width: 56, height: 56, borderRadius: 28, backgroundColor: '#1a73e8', justifyContent: 'center', alignItems: 'center', elevation: 6, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 } },
   fabText: { color: '#fff', fontSize: 28, lineHeight: 30 },
 
-  // Filter modal
-  modal:        { flex: 1, backgroundColor: '#fff' },
-  modalHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  modalTitle:   { fontSize: 17, fontWeight: '700', color: '#111' },
-  modalClose:   { fontSize: 16, color: '#1a73e8' },
-  modalBody:    { padding: 20, paddingBottom: 8 },
-  fieldLabel:   { fontSize: 13, fontWeight: '600', color: '#666', marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+  modal:       { flex: 1, backgroundColor: '#fff' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  modalTitle:  { fontSize: 17, fontWeight: '700', color: '#111' },
+  modalClose:  { fontSize: 16, color: '#1a73e8', width: 60 },
+  modalBody:   { padding: 20, paddingBottom: 8 },
+
+  fieldLabel: { fontSize: 13, fontWeight: '600', color: '#666', marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
   fieldInput: {
     backgroundColor: '#f4f6f9',
     borderRadius: 10,
@@ -391,20 +430,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
   },
-  pickerBtn:          { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f4f6f9', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 11, borderWidth: 1, borderColor: '#ddd' },
-  pickerValue:        { fontSize: 15, color: '#111' },
-  pickerPlaceholder:  { fontSize: 15, color: '#999' },
-  chevron:            { fontSize: 18, color: '#999' },
-  clearField:         { fontSize: 13, color: '#1a73e8', marginTop: 6, textAlign: 'right' },
+  pickerBtn:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f4f6f9', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 11, borderWidth: 1, borderColor: '#ddd' },
+  pickerValue:       { fontSize: 15, color: '#111' },
+  pickerPlaceholder: { fontSize: 15, color: '#999' },
+  chevron:           { fontSize: 18, color: '#999' },
+  clearField:        { fontSize: 13, color: '#1a73e8', marginTop: 6, textAlign: 'right' },
+
   modalActions: { flexDirection: 'row', padding: 16, gap: 12, borderTopWidth: 1, borderTopColor: '#eee' },
   clearBtn:     { flex: 1, paddingVertical: 13, borderRadius: 10, borderWidth: 1, borderColor: '#ddd', alignItems: 'center' },
   clearBtnText: { fontSize: 15, color: '#555', fontWeight: '600' },
   applyBtn:     { flex: 2, paddingVertical: 13, borderRadius: 10, backgroundColor: '#1a73e8', alignItems: 'center' },
   applyBtnText: { fontSize: 15, color: '#fff', fontWeight: '700' },
 
-  // Country pickers
-  modalSearch:  { margin: 12, backgroundColor: '#f4f6f9', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: '#111' },
-  countryRow:   { paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-  countryText:  { fontSize: 16, color: '#111' },
-  countryTextSelected: { color: '#1a73e8', fontWeight: '700' },
+  modalSearch:       { margin: 12, backgroundColor: '#f4f6f9', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: '#111' },
+  optionRow:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  optionText:        { fontSize: 16, color: '#111' },
+  optionTextSelected:{ fontSize: 16, color: '#1a73e8', fontWeight: '700' },
+  checkmark:         { fontSize: 16, color: '#1a73e8', fontWeight: '700' },
 });

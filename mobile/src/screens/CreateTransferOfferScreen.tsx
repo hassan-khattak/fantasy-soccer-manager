@@ -27,7 +27,8 @@ export default function CreateTransferOfferScreen() {
     setError(null);
     try {
       await createListing(playerId, askingPrice);
-      navigation.goBack();
+      navigation.popToTop();
+      navigation.navigate('Transfer List' as any);
     } catch (e: any) {
       const msg = e?.response?.data?.errors?.[0] ?? e?.response?.data?.error ?? 'Failed to list player. Please try again.';
       setError(msg);

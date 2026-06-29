@@ -4,7 +4,7 @@ import {
   ActivityIndicator, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import { getPlayer, updatePlayer } from '../api/players';
 import { deleteListing } from '../api/transferListings';
 import { PlayerDetail, POSITION_LABELS, COUNTRIES } from '../types';
@@ -45,7 +45,7 @@ export default function PlayerDetailScreen({ navigation, route }: Props) {
     }
   }, [playerId]);
 
-  useEffect(() => { load(); }, [load]);
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
   // Sync header Edit/Cancel button with editing state
   useEffect(() => {

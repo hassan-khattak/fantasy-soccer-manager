@@ -17,6 +17,7 @@ export type TeamStackParamList = {
 
 export type TransferStackParamList = {
   TransferListHome: undefined;
+  PlayerDetail: { playerId: number; isOwnPlayer: boolean };
   SelectPlayer: undefined;
   CreateTransferOffer: { playerId: number; playerName: string };
 };
@@ -61,14 +62,19 @@ function TransferStack() {
         options={{ title: 'Transfer Market' }}
       />
       <TransferStackNav.Screen
+        name="PlayerDetail"
+        component={PlayerDetailScreen}
+        options={{ title: 'Player', headerBackTitle: 'Market' }}
+      />
+      <TransferStackNav.Screen
         name="SelectPlayer"
         component={SelectPlayerScreen}
-        options={{ title: 'Select Player' }}
+        options={{ title: 'Select Player', headerBackTitle: 'Market' }}
       />
       <TransferStackNav.Screen
         name="CreateTransferOffer"
         component={CreateTransferOfferScreen}
-        options={{ title: 'List for Sale' }}
+        options={{ title: 'List for Sale', headerBackTitle: 'Select' }}
       />
     </TransferStackNav.Navigator>
   );

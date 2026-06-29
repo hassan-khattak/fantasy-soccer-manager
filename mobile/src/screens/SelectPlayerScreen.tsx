@@ -60,7 +60,7 @@ export default function SelectPlayerScreen() {
           <PlayerCard
             player={item}
             onPress={() =>
-              navigation.replace('CreateTransferOffer', {
+              navigation.navigate('CreateTransferOffer', {
                 playerId:   item.id,
                 playerName: `${item.first_name} ${item.last_name}`,
               })
