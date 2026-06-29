@@ -24,6 +24,11 @@
       "key": "player_id",
       "value": "1",
       "type": "string"
+    },
+    {
+      "key": "listing_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -53,7 +58,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -61,8 +69,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             },
             "description": "Register a new user. Auto-saves access_token and refresh_token to collection variables."
           }
@@ -90,7 +103,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -98,8 +114,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "description": "Login with existing credentials. Auto-saves tokens to collection variables."
           }
@@ -129,7 +150,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -137,8 +161,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/refresh",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "refresh"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
             },
             "description": "Rotate the refresh token. Old refresh_token is immediately revoked. Auto-saves new tokens."
           }
@@ -161,8 +190,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -170,10 +205,15 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/logout",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "logout"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
             },
-            "description": "Logout — revokes refresh token and rotates jti. Clears saved tokens."
+            "description": "Logout \u2014 revokes refresh token and rotates jti. Clears saved tokens."
           }
         }
       ]
@@ -210,12 +250,19 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/team",
-              "host": ["{{base_url}}"],
-              "path": ["team"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team"
+              ]
             },
             "description": "Returns the current user's team with all 20 players. Auto-saves first player_id for use in Get Player Detail."
           }
@@ -240,8 +287,14 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -249,8 +302,12 @@
             },
             "url": {
               "raw": "{{base_url}}/team",
-              "host": ["{{base_url}}"],
-              "path": ["team"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team"
+              ]
             },
             "description": "Update team name and/or country. Returns the full team response including players. Budget is not a permitted param."
           }
@@ -281,12 +338,20 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/players/{{player_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["players", "{{player_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "players",
+                "{{player_id}}"
+              ]
             },
             "description": "Returns full player detail. player_id is auto-saved by Get My Team. Transfer history is empty array until Slice 5."
           }
@@ -311,8 +376,14 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -320,11 +391,131 @@
             },
             "url": {
               "raw": "{{base_url}}/players/{{player_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["players", "{{player_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "players",
+                "{{player_id}}"
+              ]
             },
             "description": "Update player first_name, last_name, and/or country. Returns 403 if the player does not belong to the authenticated user's team. position and market_value are ignored (strong params)."
           }
+        }
+      ]
+    },
+    {
+      "name": "Transfer Listings",
+      "item": [
+        {
+          "name": "GET Transfer Listings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transfer_listings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer_listings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('data is array', () => pm.expect(body.data).to.be.an('array'));",
+                  "pm.test('meta has total_count', () => pm.expect(body.meta).to.have.property('total_count'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Player for Sale",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"player_id\": {{player_id}}, \"asking_price\": 2000000}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transfer_listings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer_listings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('listing_id', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove Listing",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transfer_listings/{{listing_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer_listings",
+                "{{listing_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
