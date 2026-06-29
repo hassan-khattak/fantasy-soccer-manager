@@ -50,6 +50,36 @@ RSpec.describe 'GET /api/v1/players/:id', type: :request do
   end
 end
 
+RSpec.describe 'GET /api/v1/players/:id — transfer history', type: :request do
+  let(:user)    { create(:user) }
+  let!(:team)   { create(:team, user: user) }
+  let!(:player) { create(:player, team: team) }
+  let(:headers) { auth_headers(user) }
+
+  context 'when player has no transfers' do
+    it 'returns an empty transfers array' do
+      get "/api/v1/players/#{player.id}", headers: headers, as: :json
+      expect(json['transfers']).to eq([])
+    end
+  end
+
+  context 'when player has been transferred' do
+    let(:other_user) { create(:user) }
+    let!(:other_team) { create(:team, user: other_user) }
+    let!(:listing)   { create(:transfer_listing, player: player) }
+    let!(:transfer)  { create(:transfer, player: player, transfer_listing: listing,
+                                         from_team: team, to_team: other_team) }
+
+    it 'returns transfers with from_team and to_team' do
+      get "/api/v1/players/#{player.id}", headers: headers, as: :json
+      t = json['transfers'].first
+      expect(t).to include('id', 'price', 'market_value_after', 'created_at')
+      expect(t['from_team']).to include('id', 'name', 'country')
+      expect(t['to_team']).to   include('id', 'name', 'country')
+    end
+  end
+end
+
 RSpec.describe 'PATCH /api/v1/players/:id', type: :request do
   let(:user)          { create(:user) }
   let(:other_user)    { create(:user) }

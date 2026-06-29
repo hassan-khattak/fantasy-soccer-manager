@@ -2,7 +2,7 @@ module Api
   module V1
     class PlayersController < ApplicationController
       def show
-        @player = Player.includes(:active_listing).find(params[:id])
+        @player = Player.includes(:active_listing, transfers: [:from_team, :to_team]).find(params[:id])
       end
 
       def update

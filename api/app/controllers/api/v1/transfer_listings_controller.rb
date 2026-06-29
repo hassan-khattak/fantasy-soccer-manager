@@ -32,6 +32,20 @@ module Api
         render json: { error: 'Player is already listed for sale' }, status: :conflict
       end
 
+      # POST /api/v1/transfer_listings/:id/buy
+      def buy
+        TransferService.call(listing_id: params[:id].to_i, buyer: current_user)
+        render json: { message: 'Transfer successful' }, status: :created
+      rescue TransferService::AlreadySold
+        render json: { error: 'Player has already been sold' }, status: :conflict
+      rescue TransferService::InsufficientFunds
+        render json: { error: 'Insufficient budget' }, status: :unprocessable_content
+      rescue TransferService::SelfBuy
+        render json: { error: 'Cannot buy your own player' }, status: :forbidden
+      rescue ActiveRecord::RecordNotFound
+        render json: { error: 'Listing not found' }, status: :not_found
+      end
+
       def destroy
         listing = current_user.team.transfer_listings.find(params[:id])
         listing.update!(active: false)
