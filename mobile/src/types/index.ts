@@ -65,6 +65,22 @@ export const POSITION_LABELS: Record<Player['position'], string> = {
   ATT: 'Attacker',
 };
 
+export interface FilterState {
+  team_name: string;
+  min_price: string;
+  max_price: string;
+  team_country: string;
+  player_country: string;
+}
+
+export const DEFAULT_FILTERS: FilterState = {
+  team_name:      '',
+  min_price:      '',
+  max_price:      '',
+  team_country:   '',
+  player_country: '',
+};
+
 export const COUNTRIES: string[] = [
   'Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil',
   'Canada', 'Chile', 'China', 'Colombia', 'Croatia',
