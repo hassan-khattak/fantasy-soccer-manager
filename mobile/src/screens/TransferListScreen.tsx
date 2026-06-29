@@ -4,8 +4,7 @@ import {
   StyleSheet, SafeAreaView, Alert, TouchableOpacity,
   Modal, ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { buyListing, getTransferListings } from '../api/transferListings';
 import { getTeam } from '../api/team';
@@ -76,8 +75,8 @@ export default function TransferListScreen() {
       const result = await getTransferListings({
         player_name:    currentSearch                 || undefined,
         team_name:      currentFilters.team_name      || undefined,
-        min_price:      currentFilters.min_price      || undefined,
-        max_price:      currentFilters.max_price      || undefined,
+        min_price:      currentFilters.min_price ? String(parseFloat(currentFilters.min_price) * 1_000_000) : undefined,
+        max_price:      currentFilters.max_price ? String(parseFloat(currentFilters.max_price) * 1_000_000) : undefined,
         team_country:   currentFilters.team_country   || undefined,
         player_country: currentFilters.player_country || undefined,
         page: nextPage,
@@ -348,28 +347,36 @@ export default function TransferListScreen() {
                 )}
 
                 {/* Min Price */}
-                <Text style={styles.fieldLabel}>Min Price ($)</Text>
-                <TextInput
-                  style={styles.fieldInput}
-                  value={draftFilters.min_price}
-                  onChangeText={v => setDraftFilters(f => ({ ...f, min_price: v }))}
-                  placeholder="e.g. 1000000"
-                  placeholderTextColor="#999"
-                  keyboardType="numeric"
-                  clearButtonMode="while-editing"
-                />
+                <Text style={styles.fieldLabel}>Min Price ($M)</Text>
+                <View style={styles.priceInputRow}>
+                  <Text style={styles.pricePrefix}>$</Text>
+                  <TextInput
+                    style={styles.priceInput}
+                    value={draftFilters.min_price}
+                    onChangeText={v => setDraftFilters(f => ({ ...f, min_price: v }))}
+                    placeholder="e.g. 1.5"
+                    placeholderTextColor="#999"
+                    keyboardType="decimal-pad"
+                    clearButtonMode="while-editing"
+                  />
+                  <Text style={styles.priceSuffix}>M</Text>
+                </View>
 
                 {/* Max Price */}
-                <Text style={styles.fieldLabel}>Max Price ($)</Text>
-                <TextInput
-                  style={styles.fieldInput}
-                  value={draftFilters.max_price}
-                  onChangeText={v => setDraftFilters(f => ({ ...f, max_price: v }))}
-                  placeholder="e.g. 5000000"
-                  placeholderTextColor="#999"
-                  keyboardType="numeric"
-                  clearButtonMode="while-editing"
-                />
+                <Text style={styles.fieldLabel}>Max Price ($M)</Text>
+                <View style={styles.priceInputRow}>
+                  <Text style={styles.pricePrefix}>$</Text>
+                  <TextInput
+                    style={styles.priceInput}
+                    value={draftFilters.max_price}
+                    onChangeText={v => setDraftFilters(f => ({ ...f, max_price: v }))}
+                    placeholder="e.g. 5"
+                    placeholderTextColor="#999"
+                    keyboardType="decimal-pad"
+                    clearButtonMode="while-editing"
+                  />
+                  <Text style={styles.priceSuffix}>M</Text>
+                </View>
 
                 {/* Team Country */}
                 <Text style={styles.fieldLabel}>Team Country</Text>
@@ -455,16 +462,11 @@ const styles = StyleSheet.create({
   modalBody:   { padding: 20, paddingBottom: 8 },
 
   fieldLabel: { fontSize: 13, fontWeight: '600', color: '#666', marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
-  fieldInput: {
-    backgroundColor: '#f4f6f9',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    fontSize: 15,
-    color: '#111',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
+  priceInputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f4f6f9', borderRadius: 10, borderWidth: 1, borderColor: '#ddd' },
+  pricePrefix:   { paddingLeft: 14, fontSize: 15, color: '#666' },
+  priceSuffix:   { paddingRight: 14, fontSize: 15, fontWeight: '600', color: '#1a73e8' },
+  priceInput:    { flex: 1, paddingHorizontal: 8, paddingVertical: 11, fontSize: 15, color: '#111' },
+
   pickerBtn:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f4f6f9', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 11, borderWidth: 1, borderColor: '#ddd' },
   pickerValue:       { fontSize: 15, color: '#111' },
   pickerPlaceholder: { fontSize: 15, color: '#999' },
