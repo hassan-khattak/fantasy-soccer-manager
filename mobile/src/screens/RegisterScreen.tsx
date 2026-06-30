@@ -67,7 +67,6 @@ export default function RegisterScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Register</Text>
       {error && <Text style={styles.error}>{error}</Text>}
       <TextInput
         style={styles.input}
@@ -100,7 +99,6 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 24 },
   input: {
     borderWidth: 1,
     borderColor: '#d1d5db',

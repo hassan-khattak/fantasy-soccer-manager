@@ -16,8 +16,16 @@ export default function AuthNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Landing" component={LandingScreen} />
-      <Stack.Screen name="SignIn" component={SignInScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen
+        name="SignIn"
+        component={SignInScreen}
+        options={{ headerShown: true, title: 'Sign In', headerBackTitle: 'Back' }}
+      />
+      <Stack.Screen
+        name="Register"
+        component={RegisterScreen}
+        options={{ headerShown: true, title: 'Create Account', headerBackTitle: 'Back' }}
+      />
     </Stack.Navigator>
   );
 }
