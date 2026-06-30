@@ -18,8 +18,10 @@ class TransferService
       raise AlreadySold       unless listing.active?
       raise SelfBuy           if listing.player.team == @buyer.team
 
-      buyer_team  = @buyer.team.lock!
       seller_team = listing.player.team
+      # Lock both teams in consistent ID order to prevent deadlocks
+      [seller_team, @buyer.team].sort_by(&:id).each(&:lock!)
+      buyer_team = @buyer.team
 
       raise InsufficientFunds if buyer_team.budget < listing.asking_price
 
