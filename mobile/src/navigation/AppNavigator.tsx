@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
 import TeamScreen from '../screens/TeamScreen';
 import PlayerDetailScreen from '../screens/PlayerDetailScreen';
 import TeamEditorScreen from '../screens/TeamEditorScreen';
@@ -86,12 +87,23 @@ export default function AppNavigator() {
       <Tab.Screen
         name="Team"
         component={TeamStack}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'people' : 'people-outline'} size={size} color={color} />
+          ),
+        }}
       />
       <Tab.Screen
         name="Transfer List"
         component={TransferStack}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          tabBarLabel: 'Market',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'storefront' : 'storefront-outline'} size={size} color={color} />
+          ),
+        }}
       />
     </Tab.Navigator>
   );

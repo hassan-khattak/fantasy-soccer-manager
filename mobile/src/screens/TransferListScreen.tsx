@@ -11,6 +11,7 @@ import { getTeam } from '../api/team';
 import TransferOfferCard from '../components/TransferOfferCard';
 import { TransferListing, FilterState, DEFAULT_FILTERS, COUNTRIES } from '../types';
 import { TransferStackParamList } from '../navigation/AppNavigator';
+import { Ionicons } from '@expo/vector-icons';
 
 type PickerField = 'team_name' | 'team_country' | 'player_country';
 
@@ -209,7 +210,7 @@ export default function TransferListScreen() {
           clearButtonMode="while-editing"
         />
         <TouchableOpacity style={styles.filterBtn} onPress={openFilterModal}>
-          <Text style={styles.filterIcon}>▼</Text>
+          <Ionicons name={activeFilterCount > 0 ? 'funnel' : 'funnel-outline'} size={18} color="#1a73e8" />
           {activeFilterCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{activeFilterCount}</Text>
@@ -438,7 +439,6 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   filterBtn: { position: 'relative', padding: 10, backgroundColor: '#fff', borderRadius: 10, borderWidth: 1, borderColor: '#ddd', justifyContent: 'center', alignItems: 'center' },
-  filterIcon: { fontSize: 18, color: '#1a73e8' },
   badge:     { position: 'absolute', top: -4, right: -4, backgroundColor: '#e53935', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center' },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   center:    { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
