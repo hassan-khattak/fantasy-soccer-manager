@@ -61,8 +61,13 @@ export default function SelectPlayerScreen() {
             player={item}
             onPress={() =>
               navigation.navigate('CreateTransferOffer', {
-                playerId:   item.id,
-                playerName: `${item.first_name} ${item.last_name}`,
+                playerId:    item.id,
+                playerName:  `${item.first_name} ${item.last_name}`,
+                marketValue: item.market_value,
+                country:     item.country,
+                position:    item.position,
+                age:         item.age,
+                birthDate:   item.birth_date,
               })
             }
           />

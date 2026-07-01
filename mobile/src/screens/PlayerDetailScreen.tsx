@@ -217,8 +217,13 @@ export default function PlayerDetailScreen({ navigation, route }: Props) {
               <TouchableOpacity
                 style={styles.saveBtn}
                 onPress={() => navigation.navigate('CreateTransferOffer', {
-                  playerId: player.id,
-                  playerName: `${player.first_name} ${player.last_name}`,
+                  playerId:    player.id,
+                  playerName:  `${player.first_name} ${player.last_name}`,
+                  marketValue: player.market_value,
+                  country:     player.country,
+                  position:    player.position,
+                  age:         player.age,
+                  birthDate:   player.birth_date,
                 })}
               >
                 <Text style={styles.saveBtnText}>List for Sale</Text>

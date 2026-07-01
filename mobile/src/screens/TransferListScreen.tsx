@@ -30,6 +30,8 @@ export default function TransferListScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError]             = useState<string | null>(null);
   const [ownTeamId, setOwnTeamId]     = useState<number | undefined>(undefined);
+  const [budget, setBudget]           = useState<string | null>(null);
+  const [budgetVisible, setBudgetVisible] = useState(true);
 
   // Player name quick-search — ref keeps load() from going stale
   const [playerName, setPlayerName] = useState('');
@@ -105,7 +107,7 @@ export default function TransferListScreen() {
   useFocusEffect(
     useCallback(() => {
       load(true);
-      getTeam().then(t => setOwnTeamId(t.id)).catch(() => {});
+      getTeam().then(t => { setOwnTeamId(t.id); setBudget(t.budget); }).catch(() => {});
     }, [load]) // load is stable, fires only on screen focus
   );
 
@@ -198,6 +200,23 @@ export default function TransferListScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Budget bar */}
+      {budget !== null && (
+        <View style={styles.budgetBar}>
+          <Ionicons name="wallet-outline" size={16} color="#c8dbfa" style={{ marginRight: 6 }} />
+          <TouchableOpacity onPress={() => setBudgetVisible(v => !v)}>
+            <Text style={styles.budgetText}>
+              {budgetVisible
+                ? `$${(parseFloat(budget) / 1_000_000).toFixed(2)}M`
+                : '*****'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setBudgetVisible(v => !v)} style={{ marginLeft: 8 }}>
+            <Ionicons name={budgetVisible ? 'eye-outline' : 'eye-off-outline'} size={16} color="#c8dbfa" />
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Search row */}
       <View style={styles.searchRow}>
         <TextInput
@@ -484,4 +503,13 @@ const styles = StyleSheet.create({
   optionText:        { fontSize: 16, color: '#111' },
   optionTextSelected:{ fontSize: 16, color: '#1a73e8', fontWeight: '700' },
   checkmark:         { fontSize: 16, color: '#1a73e8', fontWeight: '700' },
+
+  budgetBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a73e8',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  budgetText: { fontSize: 16, fontWeight: '700', color: '#fff' },
 });

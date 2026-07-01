@@ -9,18 +9,28 @@ import TransferListScreen from '../screens/TransferListScreen';
 import CreateTransferOfferScreen from '../screens/CreateTransferOfferScreen';
 import SelectPlayerScreen from '../screens/SelectPlayerScreen';
 
+export type CreateTransferOfferParams = {
+  playerId: number;
+  playerName: string;
+  marketValue: string;
+  country: string;
+  position: string;
+  age: number;
+  birthDate: string;
+};
+
 export type TeamStackParamList = {
   TeamHome: undefined;
   PlayerDetail: { playerId: number; isOwnPlayer: boolean };
   TeamEditor: { teamName: string; teamCountry: string };
-  CreateTransferOffer: { playerId: number; playerName: string };
+  CreateTransferOffer: CreateTransferOfferParams;
 };
 
 export type TransferStackParamList = {
   TransferListHome: undefined;
   PlayerDetail: { playerId: number; isOwnPlayer: boolean };
   SelectPlayer: undefined;
-  CreateTransferOffer: { playerId: number; playerName: string };
+  CreateTransferOffer: CreateTransferOfferParams;
 };
 
 const Tab              = createBottomTabNavigator();
