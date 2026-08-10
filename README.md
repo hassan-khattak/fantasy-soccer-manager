@@ -19,8 +19,8 @@ A full-stack fantasy soccer manager built for the Toptal technical assessment.
 ### 1. Clone and configure
 
 ```bash
-git clone <repo-url>
-cd Hassan-khattak
+git clone https://github.com/hassan-khattak/fantasy-soccer-manager.git
+cd fantasy-soccer-manager
 ```
 
 Create the mobile env file:
